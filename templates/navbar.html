@@ -6,6 +6,9 @@
             </div>
             <ul class="sidebar-nav"> 
                 <li class="sidebar-item">
+                    <a href="/" class="sidebar-link">Home</a>
+                </li>
+                <li class="sidebar-item">
                     <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard"
                     aria-expanded="false" aria-controls="dashboard">Dashboard</a></li>
                     <ul id="dashboard" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
@@ -148,10 +151,12 @@
                     <!-- Logout -->
                     <div class="user-dropdown">
                         <div class="dropdown">
-                            <button class="btn btn-danger dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-danger dropdown-toggle" type="button" 
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                            style="color: white;">
                                 <i class="bi bi-person"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown" style="color:black;">
                                 <li><a class="dropdown-item" href="/productinfo">Product Information</a></li>
                                 <li>
                                     <a class="dropdown-item">System</a>
@@ -179,8 +184,5 @@
             </div>
         </nav>
         
-        <main class="content px-3 py-2">
+        <main class="content px-3 py-2 shadow">
             <div class="container-fluid">
-                <div class="mb-3">
-                    <h4>IDS</h4>
-                </div>

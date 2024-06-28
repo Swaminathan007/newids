@@ -27,9 +27,9 @@
             <tbody>
                 {%for ip in cur_ip%}
                     <tr>
-                        <td>{{ip[1]}}</td>
-                        <td><a href="/update_firewall_ip/{{ip[0]}}">Edit</a></td>
-                        <td><a href="/delete_firewall_ip/{{ip[0]}}">Delete</a></td>
+                        <td>{{ip.ip}}</td>
+                        <td><a href="/update_firewall_ip/{{ip.id}}">Edit</a></td>
+                        <td><a href="/delete_firewall_ip/{{ip.id}}">Delete</a></td>
                     </tr>
                 {%endfor%}
             </tbody>

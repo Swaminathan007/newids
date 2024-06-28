@@ -4,6 +4,7 @@ from flask import *
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_socketio import SocketIO,emit
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import subprocess
@@ -30,8 +31,8 @@ import zipfile
 from scapy.all import *
 from scapy.layers.inet import IP
 from scapy.layers.inet6 import IPv6
+from models import *
 ############################################################################
-
 
 ###################################THREADS###############################
 class LogThread(threading.Thread):
@@ -80,6 +81,8 @@ filename = None
 
 #THREADS GLOBALS
 log_thread = None
+
+
 #FLASK GLOBALS
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
@@ -92,45 +95,45 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 socketio = SocketIO(app)
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-#DATABASE GLOBALS
+
+##########################################################
+#DATABASE MODELS FOR SQL
+
+
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False, default=True)
 
-class Ip(db.Model):
+class Firewall_Ip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
+    ip = db.Column(db.String, nullable=False, unique=True)
 
-
-#LOGIN USER
+#LOGIN USER##################
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
+#############################
 #FIREWALL GLOBALS
-# conn = sqlite3.connect('users.db')
-# c = conn.cursor()
-# firewall_ip = c.execute('SELECT IP FROM ips').fetchone()
-# conn.close()
-# cur_ip = None
-# if(firewall_ip is None):
-#     firewall_ip = ("192.168.1.1",)
-
-
-firewall_ip = None
+with app.app_context():
+    firewall_ip = Firewall_Ip.query.filter_by(id=1).first()
+print(firewall_ip)
+OPNSENSE_HOST=None
 if(firewall_ip is None):
-    firewall_ip = ("192.168.1.1",)
-OPNSENSE_HOST = f"http://{firewall_ip[0]}"
+    OPNSENSE_HOST = f"http://192.168.1.1"
+else:
+    OPNSENSE_HOST = f"http://{firewall_ip.ip}"
 API_KEY = "jrvyX2oH6Ofqp/7BHfC+3YyBq8YTU3PkcGSKKC6XabZGWKZ9OkDkzp8kUtdsxvKTZ60aw2OtcOXUEw5E"
 API_SECRET = "bz92B/FFBOWs1CNrweoJ3iV8N4tkA8Rdf3KMfqzj9lTJ3zMOMbPbqOn9H+TMs2M8e7k2ae7vt4fbsc5x"
 auth = (API_KEY, API_SECRET)
-
 interfaces = []  # Initialize interfaces before usage
 sent_bytes = []
-
 url = f"{OPNSENSE_HOST}/api/diagnostics/interface/getInterfaceStatistics"
+
+
+
 ##########################
 ###########################################TRAFFIC PART###############################
 @app.route("/")
@@ -182,31 +185,24 @@ def add_rule():
 @app.route("/firewallip", methods=['GET', 'POST'])
 @login_required
 def edit_firewall_ip():
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
     if request.method == "POST":
         ip = request.form["ip"]
-        c.execute('INSERT INTO ips (IP) VALUES (?)', (ip,))
-        conn.commit()
-    cur_ip = c.execute("SELECT * FROM ips").fetchall()
-    print(cur_ip)
-    conn.close()
+        fip = Firewall_Ip(ip=ip)
+        db.session.commit()
+    cur_ip = Firewall_Ip.query.all()
     return render_template("editfirewallip.html", cur_ip=cur_ip)
 @app.route("/update_firewall_ip/<int:id>", methods=['GET', 'POST'])
 def update_firewall_ip(id):
     id = int(id)
     global OPNSENSE_HOST
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    firewall_ip = c.execute('SELECT IP FROM ips').fetchone()
+    firewall_ip = Firewall_Ip.query.filter_by(id=id).first()
     if request.method == "POST":
         ip = request.form["ip"]
-        c.execute('UPDATE ips SET IP = ? WHERE ID = ?', (ip, id))
-        conn.commit()
-        conn.close()
+        firewall_ip.ip = ip
+        db.session.commit()
         OPNSENSE_HOST = f"http://{ip}"
         return redirect(url_for('edit_firewall_ip'))
-    return render_template("update_firewall_ip.html", firewall_ip=firewall_ip[0])
+    return render_template("update_firewall_ip.html", firewall_ip=firewall_ip.ip)
 ###################################################################################
 
 
@@ -432,9 +428,8 @@ def main():
     )
     args = parser.parse_args()
     app.config["cmd"] = [args.command] + shlex.split(args.cmd_args)
-    socketio.run(app, debug=True, port=3000, host="0.0.0.0")
+    socketio.run(app, debug=True, port=5000, host="0.0.0.0")
 if __name__ == "__main__":
-    print(os.getpid())
     main()
 
 
