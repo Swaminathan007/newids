@@ -1,0 +1,17 @@
+{%extends "base.html"%}
+{%block title%}Interfaces{%endblock%}
+{%block content%}
+{%include "navbar.html"%}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 col-mx-4">
+            <h1>Interfaces Available</h1>
+        </div>
+    </div>
+    <ul class="list-group">
+        {%for interface in interfaces%}
+            <li class="list-group-item"><a href="/viewlivepackets/{{interface}}">{{interface}}</a></li>    
+        {%endfor%}
+    </ul>
+</div>
+{%endblock%}

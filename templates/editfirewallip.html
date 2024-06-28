@@ -1,0 +1,43 @@
+{%extends "base.html"%}
+{%block title%}Edit Firewall IP{%endblock%}
+{%block content%}
+{%include "navbar.html"%}
+<div class="container mt-3">
+    <div class="container shadow rounded p-2" style="width:40rem;">
+        {%if cur_ip == None%}
+        <div class="mb-2">
+            <h2>Add Firewall IP</h2>
+        </div>
+        <form method="POST">
+            <div class="input-group mb-3" style="width:35rem;">
+                <input type="text" class="form-control" name="ip">
+                <button type="submit" class="input-group-text btn btn-primary">Add IP</button>
+            </div>
+        </form>
+        {%endif%}
+        {%if cur_ip%}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for ip in cur_ip%}
+                    <tr>
+                        <td>{{ip[1]}}</td>
+                        <td><a href="/update_firewall_ip/{{ip[0]}}">Edit</a></td>
+                        <td><a href="/delete_firewall_ip/{{ip[0]}}">Delete</a></td>
+                    </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        {%endif%}
+    </div>
+</div>
+</div>
+</div>
+
+{%endblock%}

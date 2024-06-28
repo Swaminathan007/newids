@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #5A5868, #738EA1,#B3BDBD);
+            background-size: cover;
+            position: relative;
+        }
+
+       .container {
+            display: flex;
+            width: 90%;
+            max-width: 800px;
+            height: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f5f5dc;
+        }
+
+        .left {
+            flex: 1;
+            background-image: url("{{url_for('static',filename='loginform.jpg')}}");
+            background-repeat:no-repeat;
+            background-size: cover;
+        }
+
+       .right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+       .login-form {
+            width: 100%;
+            color: black;
+        }
+
+       .login-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+       .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+       .login-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+       .login-form button {
+            width: 100%;
+            padding: 10px;
+            background: #D65A29;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+       .login-form button:hover {
+            background: #cf9640;
+        }
+
+       .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+       .logo img {
+            width: 100px;
+        }
+
+        @media (max-width: 768px) {
+           .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+           .left {
+                height: 200px;
+            }
+
+           .right {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="/statics/company-logo.png" alt="Company Logo">
+        
+    </div>
+    <div class="container">
+        <div class="left"></div>
+        <div class="right">
+            <div class="login-form">
+                <form action="/login" method="POST">
+                    <h2>Login</h2>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

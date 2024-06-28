@@ -1,0 +1,186 @@
+<div class="wrapper">
+    <aside id="sidebar" style="overflow-y:hidden; transition: 200ms ease-in-out;">
+        <div class="h-100 p-2">
+            <div class="container p-2 d-flex align-items-center justify-content-center">
+                <h2 style="color:white;">OT-IDS</h2>
+            </div>
+            <ul class="sidebar-nav"> 
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard"
+                    aria-expanded="false" aria-controls="dashboard">Dashboard</a></li>
+                    <ul id="dashboard" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="/sysinfo" class="sidebar-link">Status</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Threat Intelligence</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#firewall"
+                            aria-expanded="false" aria-controls="firewall">
+                            Firewall
+                        </a>
+                        <ul id="firewall" class="sidebar-item-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="/firewallip" class="sidebar-link">Edit firewall IP</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Reports</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/addrule" class="sidebar-link">Rules</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="/sniffer" class="sidebar-link">
+                            Packet Sniffer
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#monitor"
+                            aria-expanded="false" aria-controls="monitor">
+                            OT-IDS
+                        </a>
+                        <ul id="monitor" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Wazuh</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Reports</a>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#aimlmodel"
+                            aria-expanded="false" aria-controls="dashboard">
+                            Model
+                        </a>
+                        <ul id="aimlmodel" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Train Model</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Test Model</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/feedback" class="sidebar-link">Feedback</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#User"
+                            aria-expanded="false" aria-controls="dashboard">
+                            Users and Groups
+                        </a>
+                        <ul id="User" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">User</a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link">Groups</a>
+                            </li>
+            
+                        </ul>
+                    </li>
+        
+                
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
+                        aria-expanded="false" aria-controls="auth">
+                        Auth
+                    </a>
+                    <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Register</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/logs" class="sidebar-link">
+                        Logs
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+    <div class="main" style="overflow-y: auto;">
+        <nav class="navbar navbar-expand px-3 border-bottom sticky-top">
+            <div class="container-fluid">
+                <!-- Hamburger Icon on the left -->
+                <button class="btn logo" id="sidebar-toggle" type="button" style="background-color: #fd7e14;">
+                    <span class="navbar-toggler-icon" style="color: #000;"></span>
+                </button>
+                <div class="d-flex flex-grow-1 justify-content-center">
+                    <i id="ethernet-icon" class="fas fa-ethernet mx-2"></i>
+                    <i id="wifi-icon" class="fas fa-wifi mx-2"></i>
+                </div>
+                <!-- Right-aligned content -->
+                <div class="d-flex ms-auto align-items-center">
+                    <form class="d-flex me-3" role="search">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="basic-addon2">
+                            <button class="btn btn-outline-success">
+                                <span class="input-group-text" id="basic-addon2" style="background: none; border: none;">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+        
+                    <!-- Terminal Icon -->
+                    <div class="me-3 p-2">
+                        <a href="/terminal"><i class="bi bi-terminal" style="font-size: 1.5rem;"></i></a>
+                    </div>
+
+                    <div class="me-3 p-2">
+                        <a href="#"><i class="bi bi-bell" style="font-size: 1.5rem;"></i></a>
+                    </div>
+                    
+                    <div class="me-3 p-2">
+                        <a href="#" id="fullscreen-toggle">
+                            <i class="bi bi-fullscreen" style="font-size: 1.5rem;" id="fullscreen-icon"></i></a>
+                    </div>
+                    <!-- Logout -->
+                    <div class="user-dropdown">
+                        <div class="dropdown">
+                            <button class="btn btn-danger dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="/productinfo">Product Information</a></li>
+                                <li>
+                                    <a class="dropdown-item">System</a>
+                                    <ul>
+                                        <li><a class="dropdown-item" href="#">Reboot</a></li>
+                                        <li><a class="dropdown-item" href="#">Shutdown</a></li>
+                                        <li><a class="dropdown-item" href="#">Firmware</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item">Configurtion</a>
+                                    <ul>
+                                        <li><a class="dropdown-item" href="#">Backup</a></li>
+                                        <li><a class="dropdown-item" href="#">Restore</a></li>
+                                        <li><a class="dropdown-item" href="#">Snapshots</a></li>
+                                        <li><a class="dropdown-item" href="#">Upload Scripts</a></li>
+                                    </ul>
+                                </li>
+                                <li><a class="dropdown-item" href="/changepassword">Change password</a></li>
+                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="content px-3 py-2">
+            <div class="container-fluid">
+                <div class="mb-3">
+                    <h4>IDS</h4>
+                </div>

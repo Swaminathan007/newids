@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% block title %}Add Rule{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+
+<div class="container p-4 mt-2">
+    <div class="row shadow p-2 rounded">
+        <div style="border-bottom: 1px solid black;">
+            <h2>Add Rule</h2>
+        </div>
+        <div class="mt-2">
+            <form action="/addrule" method="post">
+                <div class="mb-3">
+                    <label for="action" class="form-label">Action</label>
+                    <select class="form-select" id="action" name="action" >
+                        <option value="pass" selected>Pass</option>
+                        <option value="block">Block</option>
+                        <option value="reject">Reject</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="action" class="form-label">Interface</label>
+                    <select class="form-select" id="action" name="action" >
+                        <option value="lan" selected>LAN</option>
+                        <option value="wan">WAN</option>
+                        <option value="loopback">Loopback</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="direction" class="form-label">Direction</label>
+                    <select class="form-select" id="direction" name="direction" >
+                        <option value="in" selected>In</option>
+                        <option value="out">Out</option>
+                        <option value="any">Any</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="ipv" class="form-label">TCP/IP Version</label>
+                    <select class="form-select" id="ipv" name="ipv" >
+                        <option value="ipv4" selected>IPv4</option>
+                        <option value="ipv6">IPv6</option>
+                        <option value="ipv4/v6">IPv4/v6</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="protocol" class="form-label">Protocol</label>
+                    <select class="form-select" id="protocol" name="protocol">
+                    <option value="any" selected="selected">
+                        any                        </option>
+                      <option value="tcp" >
+                        TCP                        </option>
+                      <option value="udp" >
+                        UDP                        </option>
+                      <option value="tcp/udp" >
+                        TCP/UDP                        </option>
+                      <option value="icmp" >
+                        ICMP                        </option>
+                      <option value="esp" >
+                        ESP                        </option>
+                      <option value="ah" >
+                        AH                        </option>
+                      <option value="gre" >
+                        GRE                        </option>
+                      <option value="igmp" >
+                        IGMP                        </option>
+                      <option value="pim" >
+                        PIM                        </option>
+                      <option value="ospf" >
+                        OSPF                        </option>
+                      <option value="ggp" >
+                        GGP                        </option>
+                      <option value="ipencap" >
+                        IPENCAP                        </option>
+                      <option value="st2" >
+                        ST2                        </option>
+                      <option value="cbt" >
+                        CBT                        </option>
+                      <option value="egp" >
+                        EGP                        </option>
+                      <option value="igp" >
+                        IGP                        </option>
+                      <option value="bbn-rcc" >
+                        BBN-RCC                        </option>
+                      <option value="nvp" >
+                        NVP                        </option>
+                      <option value="pup" >
+                        PUP                        </option>
+                      <option value="argus" >
+                        ARGUS                        </option>
+                      <option value="emcon" >
+                        EMCON                        </option>
+                      <option value="xnet" >
+                        XNET                        </option>
+                      <option value="chaos" >
+                        CHAOS                        </option>
+                      <option value="mux" >
+                        MUX                        </option>
+                      <option value="dcn" >
+                        DCN                        </option>
+                      <option value="hmp" >
+                        HMP                        </option>
+                      <option value="prm" >
+                        PRM                        </option>
+                      <option value="xns-idp" >
+                        XNS-IDP                        </option>
+                      <option value="trunk-1" >
+                        TRUNK-1                        </option>
+                      <option value="trunk-2" >
+                        TRUNK-2                        </option>
+                      <option value="leaf-1" >
+                        LEAF-1                        </option>
+                      <option value="leaf-2" >
+                        LEAF-2                        </option>
+                      <option value="rdp" >
+                        RDP                        </option>
+                      <option value="irtp" >
+                        IRTP                        </option>
+                      <option value="iso-tp4" >
+                        ISO-TP4                        </option>
+                      <option value="netblt" >
+                        NETBLT                        </option>
+                      <option value="mfe-nsp" >
+                        MFE-NSP                        </option>
+                      <option value="merit-inp" >
+                        MERIT-INP                        </option>
+                      <option value="dccp" >
+                        DCCP                        </option>
+                      <option value="3pc" >
+                        3PC                        </option>
+                      <option value="idpr" >
+                        IDPR                        </option>
+                      <option value="xtp" >
+                        XTP                        </option>
+                      <option value="ddp" >
+                        DDP                        </option>
+                      <option value="idpr-cmtp" >
+                        IDPR-CMTP                        </option>
+                      <option value="tp++" >
+                        TP++                        </option>
+                      <option value="il" >
+                        IL                        </option>
+                      <option value="ipv6" >
+                        IPV6                        </option>
+                      <option value="sdrp" >
+                        SDRP                        </option>
+                      <option value="idrp" >
+                        IDRP                        </option>
+                      <option value="rsvp" >
+                        RSVP                        </option>
+                      <option value="dsr" >
+                        DSR                        </option>
+                      <option value="bna" >
+                        BNA                        </option>
+                      <option value="i-nlsp" >
+                        I-NLSP                        </option>
+                      <option value="swipe" >
+                        SWIPE                        </option>
+                      <option value="narp" >
+                        NARP                        </option>
+                      <option value="mobile" >
+                        MOBILE                        </option>
+                      <option value="tlsp" >
+                        TLSP                        </option>
+                      <option value="skip" >
+                        SKIP                        </option>
+                      <option value="ipv6-icmp" >
+                        IPV6-ICMP                        </option>
+                      <option value="cftp" >
+                        CFTP                        </option>
+                      <option value="sat-expak" >
+                        SAT-EXPAK                        </option>
+                      <option value="kryptolan" >
+                        KRYPTOLAN                        </option>
+                      <option value="rvd" >
+                        RVD                        </option>
+                      <option value="ippc" >
+                        IPPC                        </option>
+                      <option value="sat-mon" >
+                        SAT-MON                        </option>
+                      <option value="visa" >
+                        VISA                        </option>
+                      <option value="ipcv" >
+                        IPCV                        </option>
+                      <option value="cpnx" >
+                        CPNX                        </option>
+                      <option value="cphb" >
+                        CPHB                        </option>
+                      <option value="wsn" >
+                        WSN                        </option>
+                      <option value="pvp" >
+                        PVP                        </option>
+                      <option value="br-sat-mon" >
+                        BR-SAT-MON                        </option>
+                      <option value="sun-nd" >
+                        SUN-ND                        </option>
+                      <option value="wb-mon" >
+                        WB-MON                        </option>
+                      <option value="wb-expak" >
+                        WB-EXPAK                        </option>
+                      <option value="iso-ip" >
+                        ISO-IP                        </option>
+                      <option value="vmtp" >
+                        VMTP                        </option>
+                      <option value="secure-vmtp" >
+                        SECURE-VMTP                        </option>
+                      <option value="vines" >
+                        VINES                        </option>
+                      <option value="ttp" >
+                        TTP                        </option>
+                      <option value="nsfnet-igp" >
+                        NSFNET-IGP                        </option>
+                      <option value="dgp" >
+                        DGP                        </option>
+                      <option value="tcf" >
+                        TCF                        </option>
+                      <option value="eigrp" >
+                        EIGRP                        </option>
+                      <option value="sprite-rpc" >
+                        SPRITE-RPC                        </option>
+                      <option value="larp" >
+                        LARP                        </option>
+                      <option value="mtp" >
+                        MTP                        </option>
+                      <option value="ax.25" >
+                        AX.25                        </option>
+                      <option value="ipip" >
+                        IPIP                        </option>
+                      <option value="micp" >
+                        MICP                        </option>
+                      <option value="scc-sp" >
+                        SCC-SP                        </option>
+                      <option value="etherip" >
+                        ETHERIP                        </option>
+                      <option value="encap" >
+                        ENCAP                        </option>
+                      <option value="gmtp" >
+                        GMTP                        </option>
+                      <option value="ifmp" >
+                        IFMP                        </option>
+                      <option value="pnni" >
+                        PNNI                        </option>
+                      <option value="aris" >
+                        ARIS                        </option>
+                      <option value="scps" >
+                        SCPS                        </option>
+                      <option value="qnx" >
+                        QNX                        </option>
+                      <option value="a/n" >
+                        A/N                        </option>
+                      <option value="ipcomp" >
+                        IPCOMP                        </option>
+                      <option value="snp" >
+                        SNP                        </option>
+                      <option value="compaq-peer" >
+                        COMPAQ-PEER                        </option>
+                      <option value="ipx-in-ip" >
+                        IPX-IN-IP                        </option>
+                      <option value="carp" >
+                        CARP                        </option>
+                      <option value="pgm" >
+                        PGM                        </option>
+                      <option value="l2tp" >
+                        L2TP                        </option>
+                      <option value="ddx" >
+                        DDX                        </option>
+                      <option value="iatp" >
+                        IATP                        </option>
+                      <option value="stp" >
+                        STP                        </option>
+                      <option value="srp" >
+                        SRP                        </option>
+                      <option value="uti" >
+                        UTI                        </option>
+                      <option value="smp" >
+                        SMP                        </option>
+                      <option value="sm" >
+                        SM                        </option>
+                      <option value="ptp" >
+                        PTP                        </option>
+                      <option value="isis" >
+                        ISIS                        </option>
+                      <option value="crtp" >
+                        CRTP                        </option>
+                      <option value="crudp" >
+                        CRUDP                        </option>
+                      <option value="sps" >
+                        SPS                        </option>
+                      <option value="pipe" >
+                        PIPE                        </option>
+                      <option value="sctp" >
+                        SCTP                        </option>
+                      <option value="fc" >
+                        FC                        </option>
+                      <option value="rsvp-e2e-ignore" >
+                        RSVP-E2E-IGNORE                        </option>
+                      <option value="udplite" >
+                        UDPLITE                        </option>
+                      <option value="mpls-in-ip" >
+                        MPLS-IN-IP                        </option>
+                      <option value="manet" >
+                        MANET                        </option>
+                      <option value="hip" >
+                        HIP                        </option>
+                      <option value="shim6" >
+                        SHIM6                        </option>
+                      <option value="wesp" >
+                        WESP                        </option>
+                      <option value="rohc" >
+                        ROHC                        </option>
+                      <option value="pfsync" >
+                        PFSYNC                        </option>
+                      <option value="divert" >
+                        DIVERT                        </option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Add Rule</button>
+                  </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

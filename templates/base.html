@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{%block title%}{%endblock%}</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/ae360af17e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@4.11.0/css/xterm.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        *,
+        ::after,
+        ::before {
+            color:black;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: white;
+            font-size: 0.875rem;
+            opacity: 1;
+            overflow-y: scroll;
+            margin: 0;
+        }
+
+        a {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        h4 {
+            font-size: 1.275rem;
+        }
+        .wrapper {
+            align-items: stretch;
+            display: flex;
+            width: 100%;
+        }
+        #sidebar {
+            max-width: 264px;
+            min-width: 264px;
+            background: var(--bs-dark);
+            transition: background-color 0.35s ease-in-out;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-width: 0;
+            overflow: hidden;
+            transition: all 0.35s ease-in-out;
+            width: 100%;
+            color:#000;
+        }
+
+        /* Sidebar Elements Style */
+
+        .sidebar-logo {
+            padding: 1.15rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar-logo a {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+        .sidebar-item {
+            border: #000;
+            padding: 0.5rem;
+            transition: background-color 0.3s ease;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar-item :hover{
+            background-color: rgb(67, 69, 175);
+            border-radius: 10px;
+        }
+        .sidebar-nav {
+            list-style: none;
+            margin-bottom: 0;
+            padding-left: 0;
+            margin-left: 0;
+        }
+
+        .sidebar-header {
+            color: #fff;
+            font-size: .75rem;
+            padding: 1.5rem 1.5rem .375rem;
+        }
+
+        a.sidebar-link {
+            padding: .625rem 1.625rem;
+            color: #fff;
+            position: relative;
+            display: block;
+        }
+
+        .sidebar-link[data-bs-toggle="collapse"]::after {
+            border: solid;
+            border-width: 0 .075rem .075rem 0;
+            content: "";
+            display: inline-block;
+            padding: 2px;
+            position: absolute;
+            right: 1.5rem;
+            top: 1.4rem;
+            transform: rotate(-135deg);
+            transition: all .2s ease-out;
+        }
+
+        .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
+            transform: rotate(45deg);
+            transition: all .2s ease-out;
+        }
+
+        .avatar {
+            height: 40px;
+            width: 40px;
+        }
+
+        .navbar-expand .navbar-nav {
+            margin-left: auto;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 100vw;
+            width: 100vw;
+        }
+
+        @media (min-width:768px) {
+            .content {
+                max-width: auto;
+                width: auto;
+            }
+        }
+        
+
+        .illustration-img {
+            max-width: 150px;
+            width: 100%;
+        }
+
+        /* Sidebar Toggle */
+
+        #sidebar.collapsed {
+            margin-left: -264px;
+        }
+
+        /* Footer and Nav */
+
+        @media (max-width:767.98px) {
+
+            .js-sidebar {
+                margin-left: -264px;
+            }
+
+            #sidebar.collapsed {
+                margin-left: 0;
+            }
+
+            .navbar,
+            footer {
+                width: 100vw;
+            }
+        }
+
+              
+        
+        #terminal {
+            flex: 1;
+            border: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #000;
+            color: #fff;
+            border-radius: 5px;
+            overflow: auto;
+            height:500px;
+        }
+        ::-webkit-scrollbar {
+            width: 0px;
+        }
+
+    </style>
+</head>
+<body>
+    <script src="https://unpkg.com/xterm@4.11.0/lib/xterm.js"></script>
+    <script src="https://unpkg.com/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://unpkg.com/xterm-addon-web-links@0.4.0/lib/xterm-addon-web-links.js"></script>
+    <script src="https://unpkg.com/xterm-addon-search@0.8.0/lib/xterm-addon-search.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    {%block content%}
+    {%endblock%}
+    <script>
+        const sidebarToggle = document.querySelector("#sidebar-toggle");
+        sidebarToggle.addEventListener("click",function(){
+            document.querySelector("#sidebar").classList.toggle("collapsed");
+        });
+
+
+        document.querySelector(".theme-toggle").addEventListener("click",() => {
+            toggleLocalStorage();
+            toggleRootClass();
+        });
+
+        function toggleRootClass(){
+            const current = document.documentElement.getAttribute('data-bs-theme');
+            const inverted = current == 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme',inverted);
+        }
+
+        function toggleLocalStorage(){
+            if(isLight()){
+                localStorage.removeItem("light");
+            }else{
+                localStorage.setItem("light","set");
+            }
+        }
+
+        function isLight(){
+            return localStorage.getItem("light");
+        }
+
+        if(isLight()){
+            toggleRootClass();
+        }
+</script>
+<script>
+    const term = new Terminal({
+        cursorBlink: true,
+        macOptionIsMeta: true,
+        scrollback: true,
+        fontFamily: 'Fira Code, monospace'
+    });
+
+    const fit = new FitAddon.FitAddon();
+    term.loadAddon(fit);
+    term.loadAddon(new WebLinksAddon.WebLinksAddon());
+    term.loadAddon(new SearchAddon.SearchAddon());
+
+    term.open(document.getElementById("terminal"));
+    fit.fit();
+    term.resize(15, 50);
+    console.log(`size: ${term.cols} columns, ${term.rows} rows`);
+    fit.fit();
+    term.writeln('');
+
+    const socket = io.connect("/pty");
+
+    socket.on("pty-output", function (data) {
+        console.log("new output received from server:", data.output);
+        term.write(data.output);
+    });
+
+    term.onData((data) => {
+        console.log("browser terminal received new data:", data);
+        socket.emit("pty-input", { input: data });
+    });
+
+    function fitToscreen() {
+        fit.fit();
+        const dims = { cols: term.cols, rows: term.rows };
+        console.log("sending new dimensions to server's pty", dims);
+        socket.emit("resize", dims);
+    }
+
+    function debounce(func, wait_ms) {
+        let timeout;
+        return function (...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait_ms);
+        };
+    }
+    window.onresize = debounce(adjustTerminalSize, 10);
+    function customKeyEventHandler(e) {
+        if (e.type !== "keydown") {
+            return true;
+        }
+        if (e.ctrlKey && e.shiftKey) {
+            const key = e.key.toLowerCase();
+            if (key === "v") {
+                navigator.clipboard.readText().then((toPaste) => {
+                    term.writeText(toPaste);
+                });
+                return false;
+            } else if (key === "c" || key === "x") {
+                const toCopy = term.getSelection();
+                navigator.clipboard.writeText(toCopy);
+                term.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+    const wait_ms = 0;
+    window.onresize = debounce(fitToscreen, wait_ms);
+</script>
+<script>
+    var socket1 = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket1.on('log_update', function(data) {
+        alert(data.message); // This will show a popup with the log update message
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const fullscreenButton = document.getElementById('fullscreen-toggle');
+        const fullscreenIcon = document.getElementById('fullscreen-icon');
+    
+        fullscreenButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!document.fullscreenElement) {
+                // Enter full-screen
+                document.documentElement.requestFullscreen().then(() => {
+                    fullscreenIcon.classList.remove('bi-fullscreen');
+                    fullscreenIcon.classList.add('bi-fullscreen-exit');
+                }).catch((err) => {
+                    console.error(`Error attempting to enter full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                // Exit full-screen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        fullscreenIcon.classList.remove('bi-fullscreen-exit');
+                        fullscreenIcon.classList.add('bi-fullscreen');
+                    }).catch((err) => {
+                        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+            }
+        });
+    
+        // Detect if the full-screen mode is exited using the escape key or other method
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenIcon.classList.remove('bi-fullscreen-exit');
+                fullscreenIcon.classList.add('bi-fullscreen');
+            }
+        });
+    });
+    </script>
+    
+</body>
+</html>

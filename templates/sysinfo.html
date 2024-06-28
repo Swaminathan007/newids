@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}System Information{% endblock %}
+
+{% block content %}
+{% include "navbar.html" %}
+<div class="container">
+    <div class="mb-2">
+        <div class="p-2 shadow rounded">
+            <h2>System</h2>
+            <table class="table table-striped table-bordered table-light">
+                <tbody>
+                    <tr>
+                        <td>Hostname</td>
+                        <td>Linux</td>
+                    </tr>
+                    <tr>
+                        <td>S.No</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Firmware</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Network Mode</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>System time</td>
+                        <td id="systime"></td>
+                    </tr>
+                    <tr>
+                        <td>Up time</td>
+                        <td id="up-time"></td>
+                    </tr>
+                    <tr>
+                        <td>Power-On Time</td>
+                        <td id="power-on-time"></td>
+                    </tr>
+                    <tr>
+                        <td>WAN IP</td>
+                        <td id="wan-ip">{{wan_ip}}</td>
+                    </tr>
+                    <tr>
+                        <td>Cloud</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-2">
+        <div class="p-2 shadow rounded">
+            <h2>Cloud</h2>
+            <table class="table table-striped table-bordered table-light">
+                <tbody>
+                    <tr>
+                        <td>Status</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Server Location</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Log retention</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Storage</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-2">
+        <div class="p-2 shadow rounded">
+            <h2>System Utilization</h2>
+            <div id="systemChart"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    const options = {
+        chart: {
+            height: 300,
+            type: 'radialBar'
+        },
+        series: [0, 0], // Initial values
+        labels: ['CPU Utilization', 'RAM Utilization'],
+        plotOptions: {
+            radialBar: {
+                dataLabels: {
+                    name: {
+                        fontSize: '22px',
+                    },
+                    value: {
+                        fontSize: '16px',
+                    },
+                    total: {
+                        show: true,
+                        label: 'Total',
+                        formatter: function (w) {
+                            return Math.round((w.globals.series[0] + w.globals.series[1]) / 2) + '%'
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#systemChart"), options);
+    chart.render();
+
+    function updateSystemData() {
+        fetch('/system')
+            .then(response => response.json())
+            .then(data => {
+                chart.updateSeries([data.cpu[data.cpu.length - 1], data.ram[data.ram.length - 1]]);
+                
+                document.getElementById("systime").innerText = `${data.cur_date} ${data.cur_time}`;
+
+                const uptimeSeconds = data.uptime;
+                const powerOnTime = new Date(Date.now() - uptimeSeconds * 1000);
+                document.getElementById("up-time").innerText = formatDuration(uptimeSeconds);
+                document.getElementById("power-on-time").innerText = powerOnTime.toLocaleString();
+            });
+    }
+
+    function formatDuration(seconds) {
+        const days = Math.floor(seconds / 86400);
+        seconds %= 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds %= 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    setInterval(updateSystemData, 1000);
+
+    updateSystemData(); // Initial call to set the data immediately on load
+</script>
+{% endblock %}

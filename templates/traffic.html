@@ -1,0 +1,74 @@
+{%extends "base.html"%}
+{%block title%}{{interface}}{%endblock%}
+{%block content%}
+{%include "navbar.html"%}
+<style>
+    .scrollable-table {
+      max-height: 350px; /* Set max height as needed */
+      overflow-y: auto;
+    }
+    .scrollable-table thead th {
+        position: sticky;
+        top: 0;/* Ensure header appears above scrollbar */
+      }
+  </style>
+    <div class="container mt-5">
+        <div class="conatainer mt-3">
+            <h2>Live Packet Capture on Interface: {{ interface }}</h2>
+        </div>
+        <div class="shadow p-2 scrollable-table">
+            <div class="container">
+                <table class="table table-dark table-hover table-bordered" id="packet-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Source IP</th>
+                            <th>Source Port</th>
+                            <th>Destination IP</th>
+                            <th>Destination Port</th>
+                        </tr>
+                    </thead>
+                    <tbody id="packet-table-body">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function fetchPackets() {
+            const response = await fetch('/get_packets');
+            const packets = await response.json();
+            const container = document.getElementById('packet-table-body');
+            packets.forEach(packet_json => {
+                let time = packet_json["Timestamp"];
+                let src_ip = packet_json["IP header"]["Source IP"];
+                let src_port = packet_json["Transport Header"]["Source port"];
+                let dest_ip = packet_json["IP header"]["Destination IP"];
+                let dest_port = packet_json["Transport Header"]["Destination port"];
+                const tablerow = document.createElement("tr");
+                
+                const t = document.createElement("td");
+                const si = document.createElement("td");
+                const sp = document.createElement("td");
+                const di = document.createElement("td");
+                const dp = document.createElement("td");
+                
+                t.innerText = time;
+                si.innerText = src_ip;
+                sp.innerText = src_port;
+                di.innerText = dest_ip;
+                dp.innerText = dest_port;
+                
+                tablerow.appendChild(t);
+                tablerow.appendChild(si);
+                tablerow.appendChild(sp);
+                tablerow.appendChild(di);
+                tablerow.appendChild(dp);
+                container.appendChild(tablerow);
+            });
+        }
+
+        setInterval(fetchPackets, 1000);
+    </script>
+{%endblock%}

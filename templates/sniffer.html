@@ -1,0 +1,145 @@
+{%extends "base.html"%}
+{%block title%}Packet Sniffer{%endblock%}
+{%block content%}
+{%include "navbar.html"%}
+<style>
+    #modal{
+        background-color: white;
+        color:black;
+    }
+</style>
+<div class="container">
+    <h2 class="heading">Captured Network Traffic</h2>
+    <button id="startSniffing" class="btn btn-primary mb-4">Start Sniffing</button>
+    <button id="stopSniffing" class="btn btn-danger mb-4" disabled>Stop Sniffing</button>
+    <table class="table table-bordered table-hover">
+        <thead class="table table-light table-bordered table-striped">
+            <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Protocol</th>
+                <th>Interface</th>
+            </tr>
+        </thead>
+        <tbody id="traffic_table">
+            <!-- New rows will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Save Capture Modal -->
+<div class="modal fade" id="saveCaptureModal" tabindex="-1" aria-labelledby="saveCaptureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveCaptureModalLabel">Save Capture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Do you want to save the capture file?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="confirmSave">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Packet Details Modal -->
+<div class="modal fade" id="packetDetailsModal" tabindex="-1" aria-labelledby="packetDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="packetDetailsModalLabel">Packet Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="packetDetailsContent"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+</main>
+</div>
+</div>
+<script>
+    function formatJson(jsonData) {
+        try {
+            const parsedData = JSON.parse(jsonData);
+            return JSON.stringify(parsedData, null, 2);
+        } catch (e) {
+            console.error("Invalid JSON data:", e);
+            return jsonData; 
+        }
+    }
+    $(document).ready(function() {
+        var socket = io();
+
+        // Handle start button click
+        $('#startSniffing').click(function() {
+            $("#traffic_table").children().remove();
+            socket.emit('start_sniffing');
+            $(this).prop('disabled', true);  // Disable start button
+            $('#stopSniffing').prop('disabled', false);  // Enable stop button
+        });
+
+        // Handle stop button click
+        $('#stopSniffing').click(function() {
+            $(this).prop('disabled', true);  // Disable stop button
+            $('#startSniffing').prop('disabled', false);
+            $('#saveCaptureModal').modal('show');  // Show the modal
+        });
+
+        // Confirm save button click in modal
+        $('#confirmSave').click(function() {
+            socket.emit('stop_sniffing');
+            $('#saveCaptureModal').modal('hide');  // Hide the modal
+        });
+
+        // Listen for new packets
+        socket.on('new_packet', function(data) {
+            console.log(data);
+            var newRow = `<tr data-packet='${JSON.stringify(data)}'>
+                            <td>${new Date().toLocaleString()}</td>
+                            <td>${data.src_ip}</td>
+                            <td>${data.dst_ip}</td>
+                            <td>${data.protocol}</td>
+                            <td>${data.interface}</td>
+                          </tr>`;
+            $('#traffic_table').prepend(newRow);
+        });
+        // Handle row click to show packet details
+        $('#traffic_table').on('click', 'tr', function() {
+            var packetData = $(this).data('packet');
+            let formattedJson
+            if(typeof packetData == "object"){
+                formattedJson = JSON.stringify(packetData, null, 2);
+            }
+            else if(typeof packetData == "string"){
+                formattedJson = formatJson(packetData);
+                formattedJson = JSON.stringify(formattedJson,null,2);
+            }
+            $('#packetDetailsContent').text(formattedJson);
+            $('#packetDetailsModal').modal('show');
+        });
+        socket.on('download_file', function(fileUrl) {
+            var a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileUrl.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    });
+</script>
+
+
+{%endblock%}

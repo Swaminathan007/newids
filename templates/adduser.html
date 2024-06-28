@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Add User{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+<div class="d-flex align-items-center justify-content-center vh-100">
+    <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 400px;">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-danger mt-4">
+            {{ message }}
+        </div>
+        {% endfor %}
+        <h1 class="h4 mb-4 fw-bold">Create User</h1>
+        <form action="/adduser" method="post">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <input type="text" id="role" name="role" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Create User</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

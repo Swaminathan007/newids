@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include "navbar.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <style>
+        body {
+            align-items: left;
+        }
+
+        .container {
+            text-align: left;
+            max-width: 600px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .download-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .format-button {
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        
+        <div class="filter-container">
+            <h3>Search Files</h3>
+            <input type="text" id="search-bar" placeholder="Search by file name..." onkeyup="filterFiles()">
+            <br><br>
+            <h4>Filter</h4>
+            <label for="start-date">From:</label>
+            <input type="date" id="start-date" onchange="filterFiles()">
+            <label for="end-date">To:</label>
+            <input type="date" id="end-date" onchange="filterFiles()">
+        </div>
+        <h1>Available CSV Logs</h1>     
+        <ul id="file-list">
+            {% for csv_file in csv_files %}
+                <li class="file-item">
+                    <span>{{ csv_file }}</span>
+                    <button class="download-button" onclick="openModal('static\\csv\\{{ csv_file }}')">Download</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="formatModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Select Download Format</h3>
+            <button class="format-button" onclick="downloadFile('csv')">CSV</button>
+            <button class="format-button" onclick="downloadFile('xlsx')">XLSX</button>
+            <button class="format-button" onclick="downloadFile('log')">Log</button>
+            <button class="format-button" onclick="downloadFile('json')">JSON</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = '';
+
+        function openModal(file) {
+            selectedFile = file;
+            document.getElementById('formatModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('formatModal').style.display = 'none';
+        }
+
+        function downloadFile(format) {
+            window.location.href = `/download/${selectedFile}/${format}`;
+            closeModal();
+        }
+
+        function filterFiles() {
+            const searchInput = document.getElementById('search-bar').value.toLowerCase();
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const fileList = document.getElementById('file-list');
+            const files = fileList.getElementsByTagName('li');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i].getElementsByTagName('span')[0];
+                const fileName = file.textContent.toLowerCase();
+
+                const fileDateStr = fileName.split('.')[0]; // Assuming the date is part of the filename
+                const fileDate = new Date(fileDateStr);
+
+                let isVisible = true;
+
+                if (searchInput && !fileName.includes(searchInput)) {
+                    isVisible = false;
+                }
+
+                if (startDate) {
+                    const start = new Date(startDate);
+                    if (fileDate < start) {
+                        isVisible = false;
+                    }
+                }
+
+                if (endDate) {
+                    const end = new Date(endDate);
+                    if (fileDate > end) {
+                        isVisible = false;
+                    }
+                }
+
+                files[i].style.display = isVisible ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
