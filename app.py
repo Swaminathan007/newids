@@ -119,7 +119,6 @@ def load_user(user_id):
 #FIREWALL GLOBALS
 with app.app_context():
     firewall_ip = Firewall_Ip.query.filter_by(id=1).first()
-print(firewall_ip)
 OPNSENSE_HOST=None
 if(firewall_ip is None):
     OPNSENSE_HOST = f"http://192.168.1.1"
@@ -150,6 +149,7 @@ def get_interfaces():
     for interface in data['statistics']:
         if 'Loopback' not in interface and ':' not in interface:
             interfaces.append(interface)
+    print(interfaces)
     sent_bytes = [[] for i in range(len(interfaces))]
     return jsonify({'interfaces': interfaces})
 
@@ -206,7 +206,7 @@ def update_firewall_ip(id):
 ###################################################################################
 
 
-###########################################LOGIN###################################
+###########################################USER AUTHENTICATION###################################
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -218,6 +218,11 @@ def login():
             return redirect(url_for('home'))
         flash('Invalid username or password')
     return render_template('login.html')
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 ###############################################################################
 
 
@@ -391,12 +396,43 @@ def connect():
 @login_required
 def sysinfo():
     return render_template("sysinfo.html")
-@app.route('/logout')
+inbound,outbound = [],[]
+@app.route('/inboundtraffic', methods=['GET'])
 @login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+def get_inbound():
+    try:
+        diff = 0
+        response = requests.get(url, auth=(API_KEY, API_SECRET))
+        data = response.json()
+        stats = int(data['statistics']['[pflog0] / pflog0']['received-bytes'])
+        traffic_data = {}
+        c = 0
+        inbound.append(stats)
+        n = len(inbound)
+        if n >= 2:
+            diff = abs(inbound[n-1]-inbound[n-2])
+        return jsonify({"inbound":diff})
+    except Exception as e:
+        return jsonify(f"Error: {e}")
 
+@app.route('/outboundtraffic', methods=['GET'])
+@login_required
+def get_outbound():
+    try:
+        diff = 0
+        response = requests.get(url, auth=(API_KEY, API_SECRET))
+        data = response.json()
+        stats = int(data['statistics']['[pflog0] / pflog0']['sent-bytes'])
+        traffic_data = {}
+        c = 0
+        outbound.append(stats)
+        n = len(outbound)
+        if n >= 2:
+            diff = abs(outbound[n-1]-outbound[n-2])
+        return jsonify({"outbound":diff})
+    except Exception as e:
+        return jsonify(f"Error: {e}")
+############################################################################################
 app.register_blueprint(wifi_signal_blueprint)
 def main():
     # log_thread = LogThread()

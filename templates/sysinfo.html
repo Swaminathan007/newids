@@ -82,6 +82,18 @@
             <div id="systemChart"></div>
         </div>
     </div>
+
+    <div class="mb-2">
+        <div class="p-2 shadow rounded">
+            <h2>Bandwidth</h2>
+            <div class="inboundtraffic rounded mb-2 p-2" id="inboundtraffic">
+
+            </div>
+            <div class="outboundtraffic rounded mb-2 p-2" id="outboundtraffic">
+
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -142,9 +154,137 @@
 
         return `${days}d ${hours}h ${minutes}m ${seconds}s`;
     }
+    
+    const inboundtraffic_options = {
+                    chart: {
+                        height: 200,
+                        type: 'line',
+                        animations: {
+                            enabled: true,
+                            easing: 'linear',
+                            dynamicAnimation: {
+                                speed: 1000
+                            }
+                        },
+                        toolbar: {
+                            show: false
+                        },
+                        background: '#ffffff'
+                    },
+                    series: [{
+                        name: "Firewall inbound traffic",
+                        data: []
+                    }],
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'HH:mm:ss'
+                        },
+                        range: 10 * 1000 // 10 seconds
+                    },
+                    stroke: {
+                        color:'#000000',
+                        curve: 'smooth'
+                    },
+                    yaxis: {
+                        min: 0,
+                        max: 15000
+                    },
+                    legend: {
+                        show: true,
+                        position: 'top'
+                    },
+                    title: {
+                        text: "Inbound Firewall Traffic",
+                        style: {
+                            color: '#D65A29'
+                        }
+                    },
+                    fill: {
+                        colors: ['#000000']
+                    }
+                };
+    const outboundtraffic_options = {
+                    chart: {
+                        height: 200,
+                        type: 'line',
+                        animations: {
+                            enabled: true,
+                            easing: 'linear',
+                            dynamicAnimation: {
+                                speed: 1000
+                            }
+                        },
+                        toolbar: {
+                            show: false
+                        },
+                        background: '#ffffff'
+                    },
+                    series: [{
+                        name: "Firewall outbound traffic",
+                        data: []
+                    }],
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            format: 'HH:mm:ss'
+                        },
+                        range: 10 * 1000 // 10 seconds
+                    },
+                    stroke: {
+                        color:'#000000',
+                        curve: 'smooth'
+                    },
+                    yaxis: {
+                        min: 0,
+                        max: 15000
+                    },
+                    legend: {
+                        show: true,
+                        position: 'top'
+                    },
+                    title: {
+                        text: "Outbound Firewall Traffic",
+                        style: {
+                            color: '#D65A29'
+                        }
+                    },
+                    fill: {
+                        colors: ['#000000']
+                    }
+                };
+    const outboundchart = new ApexCharts(document.getElementById('outboundtraffic'), outboundtraffic_options);
+    outboundchart.render()
+    const inboundchart = new ApexCharts(document.getElementById('inboundtraffic'), inboundtraffic_options);
+    inboundchart.render()
 
+
+    function updateTrafficData() {
+        fetch('/outboundtraffic')
+            .then(response => response.json())
+            .then(data => {
+                const currentTime = new Date().getTime();
+                let traffic = parseInt(data['outbound']);
+                const newDataPoint = { x: currentTime,y:traffic}
+                outboundchart.appendData([{ data: [newDataPoint] }]);
+            })
+            .catch(error => console.error('Error fetching traffic data:', error));
+        
+        fetch('/inboundtraffic')
+            .then(response => response.json())
+            .then(data => {
+                const currentTime = new Date().getTime();
+                let traffic = parseInt(data['inbound']);
+                const newDataPoint = { x: currentTime,y:traffic}
+                inboundchart.appendData([{ data: [newDataPoint] }]);
+            })
+            .catch(error => console.error('Error fetching traffic data:', error));
+        
+        setTimeout(updateTrafficData, 1000);
+    }
+    
     setInterval(updateSystemData, 1000);
-
+    updateTrafficData()
     updateSystemData(); // Initial call to set the data immediately on load
 </script>
 {% endblock %}
