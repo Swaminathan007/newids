@@ -2,4 +2,9 @@
 {%block title%}Firewall Status{%endblock%}
 {%block content%}
 {%include "navbar.html"%}
+</div>
+</div>
+</main>
+</div>
+</div>
 {%endblock%}

@@ -32,6 +32,7 @@ from scapy.all import *
 from scapy.layers.inet import IP
 from scapy.layers.inet6 import IPv6
 from models import *
+import psutil
 ############################################################################
 
 ###################################THREADS###############################
@@ -116,62 +117,73 @@ class Firewall_Ip(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 #############################
-#FIREWALL GLOBALS
-with app.app_context():
-    firewall_ip = Firewall_Ip.query.filter_by(id=1).first()
-OPNSENSE_HOST=None
-if(firewall_ip is None):
-    OPNSENSE_HOST = f"http://192.168.1.1"
-else:
-    OPNSENSE_HOST = f"http://{firewall_ip.ip}"
-API_KEY = "jrvyX2oH6Ofqp/7BHfC+3YyBq8YTU3PkcGSKKC6XabZGWKZ9OkDkzp8kUtdsxvKTZ60aw2OtcOXUEw5E"
-API_SECRET = "bz92B/FFBOWs1CNrweoJ3iV8N4tkA8Rdf3KMfqzj9lTJ3zMOMbPbqOn9H+TMs2M8e7k2ae7vt4fbsc5x"
-auth = (API_KEY, API_SECRET)
-interfaces = []  # Initialize interfaces before usage
-sent_bytes = []
-url = f"{OPNSENSE_HOST}/api/diagnostics/interface/getInterfaceStatistics"
+##############################FIREWALL GLOBALS##########################################
+
+
+
+
+######################################JARA AND DASHBOARD GLOBALS######################################
+python_clients = []
+messages = []
+#All interfaces
+interfaces = []
+previous_stats = {}
+jara_clients = {}
+###########################################
+
 
 
 
 ##########################
 ###########################################TRAFFIC PART###############################
-@app.route("/")
+def get_interface_list():
+    stats = psutil.net_io_counters(pernic=True)
+    return list(stats.keys())
+
+def get_network_stats():
+    global previous_stats
+    current_stats = psutil.net_io_counters(pernic=True)
+    network_stats = {}
+    
+    for iface in current_stats.keys():
+        if iface in previous_stats:
+            prev_sent = previous_stats[iface].packets_sent
+            prev_recv = previous_stats[iface].packets_recv
+            sent_per_sec = current_stats[iface].packets_sent - prev_sent
+            recv_per_sec = current_stats[iface].packets_recv - prev_recv
+        else:
+            sent_per_sec = 0
+            recv_per_sec = 0
+        
+        network_stats[iface] = {
+            'packets_sent': sent_per_sec,
+            'packets_recv': recv_per_sec
+        }
+    
+    previous_stats = current_stats
+    return network_stats
+
+
+
+def emit_network_stats():
+    while True:
+        socketio.emit('network_stats', get_network_stats())
+        time.sleep(1)
+
+@app.route('/')
 @login_required
 def home():
-    return render_template("index.html")
-
-@app.route("/get-interfaces")
-def get_interfaces():
-    global sent_bytes, interfaces
-    interfaces = []
-    packets_ps = requests.get(url, auth=(API_KEY, API_SECRET))
-    data = packets_ps.json()
-    for interface in data['statistics']:
-        if 'Loopback' not in interface and ':' not in interface:
-            interfaces.append(interface)
+    global interfaces
+    interfaces = get_interface_list()
     print(interfaces)
-    sent_bytes = [[] for i in range(len(interfaces))]
-    return jsonify({'interfaces': interfaces})
+    return render_template('index.html',interfaces=interfaces)
 
-@app.route('/firewalltraffic', methods=['GET'])
-def get_traffic_value():
-    try:
-        response = requests.get(url, auth=(API_KEY, API_SECRET))
-        data = response.json()
-        stats = data['statistics']
-        traffic_data = {}
-        c = 0
-        for interface in stats:
-            if 'Loopback' not in interface and ':' not in interface:
-                sent_bytes[c].append(stats[interface]['sent-bytes'])
-                c += 1
-        if len(sent_bytes[0]) >= 2:
-            for i in range(len(sent_bytes)):
-                l = len(sent_bytes[i])
-                traffic_data[interfaces[i]] = abs(sent_bytes[i][l-1] - sent_bytes[i][l-2])
-        return jsonify(traffic_data)
-    except Exception as e:
-        return jsonify(f"Error: {e}")
+@app.route('/network_stats')
+@login_required
+def network_stats():
+    stats = get_network_stats()
+    print(stats)
+    return jsonify(stats)
 ####################################################################################################
 
 
@@ -223,6 +235,7 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+    
 ###############################################################################
 
 
@@ -359,7 +372,7 @@ def resize(data):
 @socketio.on("connect", namespace="/pty")
 def connect():
     """new client connected"""
-    logging.info("new client connected")
+    logging.info("terminal connected")
     if app.config["child_pid"]:
         # already started child process, don't start another
         return
@@ -433,6 +446,41 @@ def get_outbound():
     except Exception as e:
         return jsonify(f"Error: {e}")
 ############################################################################################
+
+#########################################JARA##############################################
+
+@app.route('/jara', methods=["GET"])
+def jara_clients_display():
+    print(jara_clients)
+    return render_template('jara_clients.html',jara_clients = jara_clients)
+@app.route("/jara/client/<jara_client>")
+def jara_client_display(jara_client):
+    jara_client_current = jara_clients[jara_client]
+    return render_template("jara_client.html",jara_client_current=jara_client_current,jara_client=jara_client)
+@app.route("/jara/client/<jara_client>/analyse_file/<file>")
+def analyse(jara_client,file):
+    # socketio.emit('analyse_file',{'command':'sudo ./jara.py -c jara.conf','file':file},room=jara_client)
+    # return redirect(url_for("jara_clients_display"))
+    return f"{jara_client} {file}"
+@socketio.on('connect')
+def handle_connect():
+    print(f'Client connected: {request.sid}')
+@socketio.on('python_client')
+def python_client(data):
+    jara_clients[request.sid] = {"files":data["files"],"interfaces":data["interfaces"]}
+    print(f'Python client registered: {request.sid}')
+    messages.append(f'Python client registered: {request.sid}')
+@socketio.on('disconnect')
+def handle_disconnect():
+    if request.sid in jara_clients:
+        jara_clients.pop(request.sid,None)
+        print(f'JARA client disconnected: {request.sid}')
+@socketio.on('client_message')
+def handle_client_message(data):
+    print(f'Received message from client: {data["data"]}')
+    messages.append(f'Received message from client: {data["data"]}')
+###########################################################################################
+
 app.register_blueprint(wifi_signal_blueprint)
 def main():
     # log_thread = LogThread()
@@ -464,7 +512,7 @@ def main():
     )
     args = parser.parse_args()
     app.config["cmd"] = [args.command] + shlex.split(args.cmd_args)
-    socketio.run(app, debug=True, port=5000, host="0.0.0.0")
+    socketio.run(app, debug=True, host="0.0.0.0")
 if __name__ == "__main__":
     main()
 

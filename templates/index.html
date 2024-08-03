@@ -1,254 +1,140 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<style>
-
-    .chart-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-start;
-        width: 100%;
-        background:hwb(204 78% 20%);
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .chart-box {
-        width: calc(50% - 20px);
-        margin: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        background: whitesmoke;
-    }
-
-    .chart-box:hover {
-        transform: scale(1.05);
-    }
-
-    #clock {
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-        border-radius: 10px;
-        background: #f5f5dc;
-    }
-
-    #clock h1, #clock p, #clock h2 {
-        height: 60px;
-        margin: 0;
-        color: #D65A29;
-    }
-
-    #clock h1 {
-        font-size: 3em;
-    }
-
-    #clock p, #clock h2 {
-        font-size: 1.5em;
-    }
-
-    #location {
-        font-size: 1.5em;
-        color: #D65A29;
-    }
-
-    .nav-link {
-        color: #D65A29;
-    }
-
-</style>
 {% include "navbar.html" %}
-<div class="container">
-    <h2 class="chart-title">Interfaces Traffic</h2>
-    <div class="chart-container">
-        <div id="clock" class="chart-box">
-            <h1 id="time"></h1>
-            <p id="date"></p>
-            <p id="location"></p>
-        </div>
-        <div id="comparison-chart" class="chart-box"></div>
-    </div>
+<div class="container shadow rounded p-2 mt-3 mb-2" id="ob_chart"></div>
+<div class="container shadow rounded p-2 mt-3 mb-2" id="ib_chart"></div>
 </div>
 </div>
 </main>
 </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var chartContainer = document.querySelector(".chart-container");
+    var socket = io();
+    var ob_interfaces_list = [];
+    var ib_interfaces_list = [];
+    let iface;
+    {%for interface in interfaces %}
+      iface = {};
+      iface.name = "{{interface}}";
+      iface.data = [];
+      ob_interfaces_list.push(iface);
+      ib_interfaces_list.push(iface);
+    {% endfor %}
+    // Initialize chart options
+    const ob_options = {
+      chart: {
+        height: 350,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+      },
+      series: ob_interfaces_list,
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm:ss'
+        },
+        range: 10 * 1000 // 10 seconds
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      yaxis: {
+        min: 0,
+        max: 100
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      },
+      title: {
+        text: "Outbound Traffic",
+      }
+    };
+    
+    const ib_options = {
+      chart: {
+        height: 350,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+      },
+      series: ib_interfaces_list,
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm:ss'
+        },
+        range: 10 * 1000 // 10 seconds
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      yaxis: {
+        min: 0,
+        max: 100
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      },
+      title: {
+        text: "Inbound Traffic",
+      },
+      colors:["#180161","#7C00FE","#FF8225"]
+    };
 
-        async function fetchInterfaces() {
-            try {
-                const response = await fetch('/get-interfaces');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                return data.interfaces;
-            } catch (error) {
-                console.error('Error fetching interfaces:', error);
-                return [];
+    var ob_chart = new ApexCharts(document.querySelector("#ob_chart"), ob_options);
+    var ib_chart = new ApexCharts(document.querySelector("#ib_chart"), ib_options);
+    ob_chart.render();
+    ib_chart.render();
+    function fetchNetworkStats() {
+      fetch('/network_stats')
+        .then(response => response.json())
+        .then(data => {
+          let c = 0;
+          console.log(data);
+          for (const interface in data) {
+            if (data.hasOwnProperty(interface)) {
+              const stats = data[interface];
+              let packetsSent = parseInt(stats.packets_sent);
+              let packetsRecv = parseInt(stats.packets_recv);
+              ob_interfaces_list[c].data.push({
+                x: new Date().getTime(),
+                y: packetsSent
+              });
+              ib_interfaces_list[c].data.push({
+                x: new Date().getTime(),
+                y: packetsRecv
+              });
+              c++;
             }
-        }
+          }
+          console.log(ob_interfaces_list);
+          ob_chart.updateSeries(ob_interfaces_list);
+          ib_chart.updateSeries(ib_interfaces_list);
+        })
+        .catch(error => console.error('Error fetching network stats:', error));
+    }
 
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const hours12 = hours % 12 || 12;
-            const timeString = `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
-            const dateString = now.toDateString();
-            document.getElementById('time').textContent = timeString;
-            document.getElementById('date').textContent = dateString;
-        }
-
-        async function fetchLocation() {
-            try {
-                const response = await fetch('https://ipinfo.io/json?token=YOUR_API_TOKEN');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                const locationString = `${data.city}, ${data.country}`;
-                document.getElementById('location').textContent = locationString;
-            } catch (error) {
-                console.error('Error fetching location:', error);
-            }
-        }
-
-        setInterval(updateClock, 1000);
-
-        async function initialize() {
-            await fetchLocation();
-            const interfaces = await fetchInterfaces();
-            console.log(interfaces);
-            const chartObjects = {};
-            const seriesData = [];
-
-            interfaces.forEach((interface) => {
-                const chartId = `chart-${interface}`;
-                var newDiv = document.createElement("div");
-                newDiv.id = chartId;
-                newDiv.className = "chart-box";
-                chartContainer.appendChild(newDiv);
-                const options = {
-                    chart: {
-                        height: 200,
-                        type: 'line',
-                        animations: {
-                            enabled: true,
-                            easing: 'linear',
-                            dynamicAnimation: {
-                                speed: 1000
-                            }
-                        },
-                        toolbar: {
-                            show: false
-                        },
-                        background: '#f5f5dc'
-                    },
-                    series: [{
-                        name: interface,
-                        data: []
-                    }],
-                    xaxis: {
-                        type: 'datetime',
-                        labels: {
-                            format: 'HH:mm:ss'
-                        },
-                        range: 10 * 1000 // 10 seconds
-                    },
-                    stroke: {
-                        color:'CF9640',
-                        curve: 'smooth'
-                    },
-                    yaxis: {
-                        min: 0,
-                        max: 2000
-                    },
-                    legend: {
-                        show: true,
-                        position: 'top'
-                    },
-                    title: {
-                        text: interface,
-                        style: {
-                            color: '#D65A29'
-                        }
-                    }
-                };
-                const chart = new ApexCharts(document.getElementById(`${chartId}`), options);
-                chart.render();
-                chartObjects[interface] = chart;
-                seriesData.push({
-                    name: interface,
-                    data: []
-                });
-            });
-
-            const pieChartOptions = {
-                chart: {
-                    type: 'pie',
-                    height: 200
-                },
-                series: [],
-                labels: interfaces,
-                colors: ['#FF4560', '#00E396', '#008FFB', '#FEB019', '#FF66B6', '#775DD0'],
-                title: {
-                    text: 'Comparison Chart',
-                    style: {
-                        color: '#D65A29'
-                    }
-                }
-            };
-
-            const pieChart = new ApexCharts(document.getElementById("comparison-chart"), pieChartOptions);
-            pieChart.render();
-
-            function updateData() {
-                fetch('/firewalltraffic')
-                    .then(response => response.json())
-                    .then(data => {
-                        const currentTime = new Date().getTime();
-                        Object.keys(data).forEach(interface => {
-                            const newDataPoint = { x: currentTime, y: data[interface] % 2000 };
-                            chartObjects[interface].appendData([{ data: [newDataPoint] }]);
-
-                            const interfaceIndex = interfaces.indexOf(interface);
-                            if (interfaceIndex > -1) {
-                                seriesData[interfaceIndex].data.push(newDataPoint.y);
-                                if (seriesData[interfaceIndex].data.length > 10) {
-                                    seriesData[interfaceIndex].data.shift();
-                                }
-                                pieChart.updateSeries(seriesData.map(s => s.data.reduce((a, b) => a + b, 0) / s.data.length));
-                            }
-                        });
-                    })
-                    .catch(error => console.error('Error fetching traffic data:', error));
-                setTimeout(updateData, 1000);
-            }
-            updateData();
-        }
-        initialize();
-
-        // Handle sidebar toggle
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-        document.querySelector('.navbar-toggler').addEventListener('click', function () {
-            sidebar.classList.toggle('active');
-            if (sidebar.classList.contains('active')) {
-                mainContent.classList.remove('full-width');
-            } else {
-                mainContent.classList.add('full-width');
-            }
-        });
-    });
-</script>
+    // Fetch network stats every second
+    setInterval(fetchNetworkStats, 1000);
+  </script>
 {% endblock %}

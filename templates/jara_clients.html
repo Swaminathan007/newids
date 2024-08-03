@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Jara{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+    <div class="container">
+      <h2>Jara clients</h2>
+      <ul class="list-group">
+          {% if jara_clients %}
+            {%for client in jara_clients%}
+                <li class="list-group-item"><a href="/jara/client/{{client}}">{{client}}</a></li>
+            {%endfor%}
+          {%else%}
+            <p>No jara clients connected</p>
+          {%endif%}
+      </ul>
+    </div>
+</div>
+</div>
+</main>
+</div>
+</div>
+{%endblock%}
