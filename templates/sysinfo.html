@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <div class="mb-2">
+    <!-- <div class="mb-2">
         <div class="p-2 shadow rounded">
             <h2>Bandwidth</h2>
             <div class="inboundtraffic rounded mb-2 p-2" id="inboundtraffic">
@@ -93,198 +93,37 @@
 
             </div>
         </div>
-    </div>
+    </div> -->
+</div>
+</div>
+</div>
+</main>
+</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-    const options = {
-        chart: {
-            height: 300,
-            type: 'radialBar'
-        },
-        series: [0, 0], // Initial values
-        labels: ['CPU Utilization', 'RAM Utilization'],
-        plotOptions: {
-            radialBar: {
-                dataLabels: {
-                    name: {
-                        fontSize: '22px',
-                    },
-                    value: {
-                        fontSize: '16px',
-                    },
-                    total: {
-                        show: true,
-                        label: 'Total',
-                        formatter: function (w) {
-                            return Math.round((w.globals.series[0] + w.globals.series[1]) / 2) + '%'
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    const chart = new ApexCharts(document.querySelector("#systemChart"), options);
-    chart.render();
-
-    function updateSystemData() {
-        fetch('/system')
-            .then(response => response.json())
-            .then(data => {
-                chart.updateSeries([data.cpu[data.cpu.length - 1], data.ram[data.ram.length - 1]]);
-                
-                document.getElementById("systime").innerText = `${data.cur_date} ${data.cur_time}`;
-
-                const uptimeSeconds = data.uptime;
-                const powerOnTime = new Date(Date.now() - uptimeSeconds * 1000);
-                document.getElementById("up-time").innerText = formatDuration(uptimeSeconds);
-                document.getElementById("power-on-time").innerText = powerOnTime.toLocaleString();
-            });
+    async function fetchData() {
+        const response = await fetch('/utilization_stats');
+        const data = await response.json();
+        return data;
     }
 
-    function formatDuration(seconds) {
-        const days = Math.floor(seconds / 86400);
-        seconds %= 86400;
-        const hours = Math.floor(seconds / 3600);
-        seconds %= 3600;
-        const minutes = Math.floor(seconds / 60);
-        seconds = Math.floor(seconds % 60);
+    async function renderChart() {
+        const data = await fetchData();
 
-        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        var options = {
+            series: [data.cpu, data.memory],
+            chart: {
+                type: 'pie',
+                height:300
+            },
+            labels: ['CPU Utilization', 'Memory Utilization']
+        };
+
+        var chart = new ApexCharts(document.querySelector("#systemChart"), options);
+        chart.render();
     }
-    
-    const inboundtraffic_options = {
-                    chart: {
-                        height: 200,
-                        type: 'line',
-                        animations: {
-                            enabled: true,
-                            easing: 'linear',
-                            dynamicAnimation: {
-                                speed: 1000
-                            }
-                        },
-                        toolbar: {
-                            show: false
-                        },
-                        background: '#ffffff'
-                    },
-                    series: [{
-                        name: "Firewall inbound traffic",
-                        data: []
-                    }],
-                    xaxis: {
-                        type: 'datetime',
-                        labels: {
-                            format: 'HH:mm:ss'
-                        },
-                        range: 10 * 1000 // 10 seconds
-                    },
-                    stroke: {
-                        color:'#000000',
-                        curve: 'smooth'
-                    },
-                    yaxis: {
-                        min: 0,
-                        max: 15000
-                    },
-                    legend: {
-                        show: true,
-                        position: 'top'
-                    },
-                    title: {
-                        text: "Inbound Firewall Traffic",
-                        style: {
-                            color: '#D65A29'
-                        }
-                    },
-                    fill: {
-                        colors: ['#000000']
-                    }
-                };
-    const outboundtraffic_options = {
-                    chart: {
-                        height: 200,
-                        type: 'line',
-                        animations: {
-                            enabled: true,
-                            easing: 'linear',
-                            dynamicAnimation: {
-                                speed: 1000
-                            }
-                        },
-                        toolbar: {
-                            show: false
-                        },
-                        background: '#ffffff'
-                    },
-                    series: [{
-                        name: "Firewall outbound traffic",
-                        data: []
-                    }],
-                    xaxis: {
-                        type: 'datetime',
-                        labels: {
-                            format: 'HH:mm:ss'
-                        },
-                        range: 10 * 1000 // 10 seconds
-                    },
-                    stroke: {
-                        color:'#000000',
-                        curve: 'smooth'
-                    },
-                    yaxis: {
-                        min: 0,
-                        max: 15000
-                    },
-                    legend: {
-                        show: true,
-                        position: 'top'
-                    },
-                    title: {
-                        text: "Outbound Firewall Traffic",
-                        style: {
-                            color: '#D65A29'
-                        }
-                    },
-                    fill: {
-                        colors: ['#000000']
-                    }
-                };
-    const outboundchart = new ApexCharts(document.getElementById('outboundtraffic'), outboundtraffic_options);
-    outboundchart.render()
-    const inboundchart = new ApexCharts(document.getElementById('inboundtraffic'), inboundtraffic_options);
-    inboundchart.render()
 
-
-    function updateTrafficData() {
-        fetch('/outboundtraffic')
-            .then(response => response.json())
-            .then(data => {
-                const currentTime = new Date().getTime();
-                let traffic = parseInt(data['outbound']);
-                const newDataPoint = { x: currentTime,y:traffic}
-                outboundchart.appendData([{ data: [newDataPoint] }]);
-            })
-            .catch(error => console.error('Error fetching traffic data:', error));
-        
-        fetch('/inboundtraffic')
-            .then(response => response.json())
-            .then(data => {
-                const currentTime = new Date().getTime();
-                let traffic = parseInt(data['inbound']);
-                const newDataPoint = { x: currentTime,y:traffic}
-                inboundchart.appendData([{ data: [newDataPoint] }]);
-            })
-            .catch(error => console.error('Error fetching traffic data:', error));
-        
-        setTimeout(updateTrafficData, 1000);
-    }
-    
-    setInterval(updateSystemData, 1000);
-    updateTrafficData()
-    updateSystemData(); // Initial call to set the data immediately on load
+    renderChart();
 </script>
 {% endblock %}

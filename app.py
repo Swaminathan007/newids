@@ -170,6 +170,7 @@ def emit_network_stats():
         socketio.emit('network_stats', get_network_stats())
         time.sleep(1)
 
+
 @app.route('/')
 @login_required
 def home():
@@ -189,32 +190,97 @@ def network_stats():
 
 ##################################################FIREWALL##############################
 
-@app.route('/addrule', methods=['GET', 'POST'])
-@login_required
-def add_rule():
-    return render_template('add_rule.html')
+# @app.route('/addrule', methods=['GET', 'POST'])
+# @login_required
+# def add_rule():
+#     return render_template('add_rule.html')
 
-@app.route("/firewallip", methods=['GET', 'POST'])
-@login_required
-def edit_firewall_ip():
-    if request.method == "POST":
-        ip = request.form["ip"]
-        fip = Firewall_Ip(ip=ip)
-        db.session.commit()
-    cur_ip = Firewall_Ip.query.all()
-    return render_template("editfirewallip.html", cur_ip=cur_ip)
-@app.route("/update_firewall_ip/<int:id>", methods=['GET', 'POST'])
-def update_firewall_ip(id):
-    id = int(id)
-    global OPNSENSE_HOST
-    firewall_ip = Firewall_Ip.query.filter_by(id=id).first()
-    if request.method == "POST":
-        ip = request.form["ip"]
-        firewall_ip.ip = ip
-        db.session.commit()
-        OPNSENSE_HOST = f"http://{ip}"
-        return redirect(url_for('edit_firewall_ip'))
-    return render_template("update_firewall_ip.html", firewall_ip=firewall_ip.ip)
+# @app.route("/firewallip", methods=['GET', 'POST'])
+# @login_required
+# def edit_firewall_ip():
+#     if request.method == "POST":
+#         ip = request.form["ip"]
+#         fip = Firewall_Ip(ip=ip)
+#         db.session.commit()
+#     cur_ip = Firewall_Ip.query.all()
+#     return render_template("editfirewallip.html", cur_ip=cur_ip)
+# @app.route("/update_firewall_ip/<int:id>", methods=['GET', 'POST'])
+# def update_firewall_ip(id):
+#     id = int(id)
+#     global OPNSENSE_HOST
+#     firewall_ip = Firewall_Ip.query.filter_by(id=id).first()
+#     if request.method == "POST":
+#         ip = request.form["ip"]
+#         firewall_ip.ip = ip
+#         db.session.commit()
+#         OPNSENSE_HOST = f"http://{ip}"
+#         return redirect(url_for('edit_firewall_ip'))
+#     return render_template("update_firewall_ip.html", firewall_ip=firewall_ip.ip)
+
+
+def get_iptables_rules():
+    try:
+        result = subprocess.run(['sudo', 'iptables', '-L', '-n', '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode != 0:
+            raise Exception(result.stderr)
+        return result.stdout
+    except Exception as e:
+        return str(e)
+
+def add_iptables_rule(rule):
+    try:
+        subprocess.run(['sudo', 'iptables'] + rule.split(), check=True)
+    except subprocess.CalledProcessError as e:
+        return str(e)
+    return None
+
+
+def delete_iptables_rule(chain, num):
+    try:
+        subprocess.run(['sudo', 'iptables', '-D', chain, num], check=True)
+    except subprocess.CalledProcessError as e:
+        return str(e)
+    return None
+@app.route('/firewall', methods=['GET', 'POST'])
+def firewall():
+    if request.method == 'POST':
+        ip = request.form.get('ip')
+        direction = request.form.get('direction')
+        port = request.form.get('port')
+        protocol = request.form.get('protocol')
+        action = request.form.get('action')
+
+        if ip and direction and action:
+            rule = f"-A {direction} -s {ip} -j {action}" if direction == 'INPUT' else f"-A {direction} -d {ip} -j {action}"
+            if port and protocol:
+                rule += f" -p {protocol} --dport {port}"
+            error = add_iptables_rule(rule)
+            if error:
+                flash(f"Error: {error}", 'danger')
+            else:
+                flash("Rule added successfully!", 'success')
+        else:
+            flash("Please fill in all required fields.", 'danger')
+        return redirect(url_for('firewall'))
+
+    rules = get_iptables_rules()
+    return render_template('firewall.html', rules=rules)
+@app.route('/delete_rule', methods=['POST'])
+def delete_rule():
+    chain = request.form.get('chain')
+    num = request.form.get('num')
+
+    if chain and num:
+        error = delete_iptables_rule(chain, num)
+        if error:
+            flash(f"Error: {error}", 'danger')
+        else:
+            flash("Rule deleted successfully!", 'success')
+    else:
+        flash("Invalid rule selection.", 'danger')
+    
+    return redirect(url_for('firewall'))
+
 ###################################################################################
 
 
@@ -403,48 +469,25 @@ def connect():
             "and forward pty output to client"
         )
         logging.info("task started")
-#########################################################################################
+####################################SYSTEM DASHBOARD#####################################################
 
 @app.route("/sysinfo")
 @login_required
 def sysinfo():
     return render_template("sysinfo.html")
-inbound,outbound = [],[]
-@app.route('/inboundtraffic', methods=['GET'])
-@login_required
-def get_inbound():
-    try:
-        diff = 0
-        response = requests.get(url, auth=(API_KEY, API_SECRET))
-        data = response.json()
-        stats = int(data['statistics']['[pflog0] / pflog0']['received-bytes'])
-        traffic_data = {}
-        c = 0
-        inbound.append(stats)
-        n = len(inbound)
-        if n >= 2:
-            diff = abs(inbound[n-1]-inbound[n-2])
-        return jsonify({"inbound":diff})
-    except Exception as e:
-        return jsonify(f"Error: {e}")
 
-@app.route('/outboundtraffic', methods=['GET'])
+@app.route('/utilization_stats')
 @login_required
-def get_outbound():
-    try:
-        diff = 0
-        response = requests.get(url, auth=(API_KEY, API_SECRET))
-        data = response.json()
-        stats = int(data['statistics']['[pflog0] / pflog0']['sent-bytes'])
-        traffic_data = {}
-        c = 0
-        outbound.append(stats)
-        n = len(outbound)
-        if n >= 2:
-            diff = abs(outbound[n-1]-outbound[n-2])
-        return jsonify({"outbound":diff})
-    except Exception as e:
-        return jsonify(f"Error: {e}")
+def get_utilization():
+    cpu_percent = psutil.cpu_percent(interval=1)
+    memory_info = psutil.virtual_memory()
+    memory_percent = memory_info.percent
+    utilization = {
+        'cpu': cpu_percent,
+        'memory': memory_percent
+    }
+    
+    return jsonify(utilization)
 ############################################################################################
 
 #########################################JARA##############################################
@@ -481,6 +524,25 @@ def handle_client_message(data):
     messages.append(f'Received message from client: {data["data"]}')
 ###########################################################################################
 
+
+#################################SYSTEM CONTROL##############################################
+@app.route("/system/reboot")
+@login_required
+def system_reboot():
+    try:
+        subprocess.run(['sudo', 'reboot'] , check=True)
+    except subprocess.CalledProcessError as e:
+        return str(e)
+    return "Reboot"
+@app.route("/system/shutdown")
+@login_required
+def system_shutdown():
+    try:
+        subprocess.run(['sudo', 'shutdown'] , check=True)
+    except subprocess.CalledProcessError as e:
+        return str(e)
+    return "Reboot"
+#############################################################################################
 app.register_blueprint(wifi_signal_blueprint)
 def main():
     # log_thread = LogThread()

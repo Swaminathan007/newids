@@ -4,6 +4,7 @@
 {%include "navbar.html"%}
                         <div id="terminal" class="mb-3"></div>
                 </div>
+           </div>
         </main>
     </div>
 </div>
@@ -12,7 +13,7 @@
         cursorBlink: true,
         macOptionIsMeta: true,
         scrollback: true,
-        fontFamily: 'Fira Code, monospace'
+        fontFamily: 'Fira Code, monospace',
     });
 
     const fit = new FitAddon.FitAddon();
@@ -22,7 +23,7 @@
 
     term.open(document.getElementById("terminal"));
     fit.fit();
-    term.resize(15, 50);
+    term.resize(150, 50);
     console.log(`size: ${term.cols} columns, ${term.rows} rows`);
     fit.fit();
     term.writeln('');

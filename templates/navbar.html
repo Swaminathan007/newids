@@ -9,55 +9,25 @@
                     <a href="/" class="sidebar-link">Home</a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard"
-                    aria-expanded="false" aria-controls="dashboard">Dashboard</a></li>
-                    <ul id="dashboard" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="/sysinfo" class="sidebar-link">Status</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Threat Intelligence</a>
-                        </li>
-                    </ul>
+                    <a href="/sysinfo" class="sidebar-link">System Information</a></li>
                 </li>
                 <li class="sidebar-item">
                       <a href="/jara" class="sidebar-link">Jara</a>
                 </li>
                 <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#firewall"
-                            aria-expanded="false" aria-controls="firewall">
+                        <a href="/firewall" class="sidebar-link">
                             Firewall
                         </a>
-                        <ul id="firewall" class="sidebar-item-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                            <li class="sidebar-item">
-                                <a href="/firewallip" class="sidebar-link">Edit firewall IP</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Reports</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/addrule" class="sidebar-link">Rules</a>
-                            </li>
-                        </ul>
-                    </li>
+                </li>
                     <li class="sidebar-item">
                         <a href="/sniffer" class="sidebar-link">
                             Packet Sniffer
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#monitor"
-                            aria-expanded="false" aria-controls="monitor">
-                            OT-IDS
+                        <a href="/wazuh" class="sidebar-link">
+                            Wazuh
                         </a>
-                        <ul id="monitor" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Wazuh</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Reports</a>
-                            </li>
-                        </ul>
                     </li>
                     
                 <li class="sidebar-item">
@@ -164,8 +134,8 @@
                                 <li>
                                     <a class="dropdown-item">System</a>
                                     <ul>
-                                        <li><a class="dropdown-item" href="#">Reboot</a></li>
-                                        <li><a class="dropdown-item" href="#">Shutdown</a></li>
+                                        <li><a class="dropdown-item" href="/system/reboot">Reboot</a></li>
+                                        <li><a class="dropdown-item" href="/system/shutdown">Shutdown</a></li>
                                         <li><a class="dropdown-item" href="#">Firmware</a></li>
                                     </ul>
                                 </li>
