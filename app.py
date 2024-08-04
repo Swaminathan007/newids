@@ -33,7 +33,6 @@ from scapy.layers.inet import IP
 from scapy.layers.inet6 import IPv6
 from models import *
 import psutil
-import iptc
 ############################################################################
 
 ###################################THREADS###############################
