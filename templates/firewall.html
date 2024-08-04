@@ -3,6 +3,7 @@
 {%block content%}
 {%include "navbar.html"%}
 <div class="container mt-2">
+    <h1>Firewall Rules</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -10,89 +11,64 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-    <div class="container">
-        <h1>Firewall Rules</h1>
-        <form method="POST" class="shadow rounded p-2">
-            <div class="form-row">
-                <div class="form-group col-md-3">
-                    <label for="ip">IP Address</label>
-                    <input type="text" class="form-control" id="ip" name="ip" placeholder="e.g., 192.168.1.1" required>
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="direction">Direction</label>
-                    <select class="form-control" id="direction" name="direction" required>
-                        <option value="INPUT">INPUT</option>
-                        <option value="OUTPUT">OUTPUT</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="port">Port</label>
-                    <input type="text" class="form-control" id="port" name="port" placeholder="e.g., 80">
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="protocol">Protocol</label>
-                    <select class="form-control" id="protocol" name="protocol">
-                        <option value="">Any</option>
-                        <option value="tcp">TCP</option>
-                        <option value="udp">UDP</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="action">Action</label>
-                    <select class="form-control" id="action" name="action" required>
-                        <option value="ACCEPT">ACCEPT</option>
-                        <option value="DROP">DROP</option>
-                    </select>
-                </div>
+    <form method="POST" class="shadow rounded p-2">
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label for="ip">IP Address</label>
+                <input type="text" class="form-control" id="ip" name="ip" placeholder="e.g., 192.168.1.1" required>
             </div>
-            <div class="mt-1">
-                <button type="submit" class="btn btn-primary">Add Rule</button>
+            <div class="form-group col-md-3">
+                <label for="direction">Direction</label>
+                <select class="form-control" id="direction" name="direction" required>
+                    <option value="INPUT">INPUT</option>
+                    <option value="OUTPUT">OUTPUT</option>
+                </select>
             </div>
-        </form>
-    </div>
+            <div class="form-group col-md-2">
+                <label for="port">Port</label>
+                <input type="text" class="form-control" id="port" name="port" placeholder="e.g., 80">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="protocol">Protocol</label>
+                <select class="form-control" id="protocol" name="protocol">
+                    <option value="">Any</option>
+                    <option value="tcp">TCP</option>
+                    <option value="udp">UDP</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="action">Action</label>
+                <select class="form-control" id="action" name="action" required>
+                    <option value="ACCEPT">ACCEPT</option>
+                    <option value="DROP">DROP</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Rule</button>
+    </form>
     <hr>
-    <div class="container">
-        <h2>Current Rules</h2>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Num</th>
-                    <th>Chain</th>
-                    <th>Target</th>
-                    <th>Protocol</th>
-                    <th>Source</th>
-                    <th>Destination</th>
-                    <th>Options</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for line in rules.splitlines() if line and (line[0].isdigit() or line.startswith('Chain')) %}
-                <tr>
-                    {% if line.startswith('Chain') %}
-                        <td colspan="8"><strong>{{ line }}</strong></td>
-                    {% else %}
-                        {% set parts = line.split() %}
-                        <td>{{ parts[0] }}</td>
-                        <td>{{ parts[1] }}</td>
-                        <td>{{ parts[2] }}</td>
-                        <td>{{ parts[3] }}</td>
-                        <td>{{ parts[4] }}</td>
-                        <td>{{ parts[5] }}</td>
-                        <td>{{ ' '.join(parts[6:]) }}</td>
-                        <td>
-                            <form method="POST" action="{{ url_for('delete_rule') }}">
-                                <input type="hidden" name="chain" value="{{ parts[1] }}">
-                                <input type="hidden" name="num" value="{{ parts[0] }}">
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </td>
-                    {% endif %}
-                </tr>
+    <h2>Current Rules</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Chain</th>
+                <th>Target</th>
+                <th>Protocol</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in rules.splitlines() if line and not line.startswith('target') %}
+            <tr>
+                {% for item in line.split() %}
+                <td>{{ item }}</td>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 </div>
 </div>

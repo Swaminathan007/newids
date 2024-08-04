@@ -1,31 +1,19 @@
-import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
+import iptc
 
-def get_aws_cli_details():
-    try:
-        # Check if AWS credentials are configured
-        session = boto3.Session()
-        credentials = session.get_credentials()
-        if credentials is None:
-            return None
-        
-        # Get the AWS IAM username
-        iam_client = boto3.client('iam')
-        user_response = iam_client.get_user()
-        print(user_response)
-        username = user_response['User']['UserName']
-        # Get the AWS availability zone
-        ec2_client = boto3.client('ec2')
-        response = ec2_client.describe_availability_zones()
-        availability_zones = [az['ZoneName'] for az in response['AvailabilityZones']]
-        
-        return {
-            'username': username,
-            'availability_zones': availability_zones
-        }
-    except (NoCredentialsError, ClientError):
-        return None
+def print_iptables_rules():
+    table = iptc.Table(iptc.Table.FILTER)
+    table.refresh()
+    for chain in table.chains:
+        print("=======================")
+        print("Chain:", chain.name)
+        for rule in chain.rules:
+            print("Rule: proto:", rule.protocol, "src:", rule.src, "dst:", rule.dst, 
+                  "in:", rule.in_interface, "out:", rule.out_interface)
+            print("Matches:", end=" ")
+            for match in rule.matches:
+                print(match.name, end=" ")
+            print("Target:", rule.target.name)
+    print("=======================")
 
-# Example usage
-aws_details = get_aws_cli_details()
-# print(aws_details)
+if __name__ == "__main__":
+    print_iptables_rules()

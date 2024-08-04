@@ -33,6 +33,7 @@ from scapy.layers.inet import IP
 from scapy.layers.inet6 import IPv6
 from models import *
 import psutil
+import iptc
 ############################################################################
 
 ###################################THREADS###############################
@@ -190,33 +191,6 @@ def network_stats():
 
 ##################################################FIREWALL##############################
 
-# @app.route('/addrule', methods=['GET', 'POST'])
-# @login_required
-# def add_rule():
-#     return render_template('add_rule.html')
-
-# @app.route("/firewallip", methods=['GET', 'POST'])
-# @login_required
-# def edit_firewall_ip():
-#     if request.method == "POST":
-#         ip = request.form["ip"]
-#         fip = Firewall_Ip(ip=ip)
-#         db.session.commit()
-#     cur_ip = Firewall_Ip.query.all()
-#     return render_template("editfirewallip.html", cur_ip=cur_ip)
-# @app.route("/update_firewall_ip/<int:id>", methods=['GET', 'POST'])
-# def update_firewall_ip(id):
-#     id = int(id)
-#     global OPNSENSE_HOST
-#     firewall_ip = Firewall_Ip.query.filter_by(id=id).first()
-#     if request.method == "POST":
-#         ip = request.form["ip"]
-#         firewall_ip.ip = ip
-#         db.session.commit()
-#         OPNSENSE_HOST = f"http://{ip}"
-#         return redirect(url_for('edit_firewall_ip'))
-#     return render_template("update_firewall_ip.html", firewall_ip=firewall_ip.ip)
-
 
 def get_iptables_rules():
     try:
@@ -234,13 +208,6 @@ def add_iptables_rule(rule):
         return str(e)
     return None
 
-
-def delete_iptables_rule(chain, num):
-    try:
-        subprocess.run(['sudo', 'iptables', '-D', chain, num], check=True)
-    except subprocess.CalledProcessError as e:
-        return str(e)
-    return None
 @app.route('/firewall', methods=['GET', 'POST'])
 def firewall():
     if request.method == 'POST':
@@ -265,21 +232,6 @@ def firewall():
 
     rules = get_iptables_rules()
     return render_template('firewall.html', rules=rules)
-@app.route('/delete_rule', methods=['POST'])
-def delete_rule():
-    chain = request.form.get('chain')
-    num = request.form.get('num')
-
-    if chain and num:
-        error = delete_iptables_rule(chain, num)
-        if error:
-            flash(f"Error: {error}", 'danger')
-        else:
-            flash("Rule deleted successfully!", 'success')
-    else:
-        flash("Invalid rule selection.", 'danger')
-    
-    return redirect(url_for('firewall'))
 
 ###################################################################################
 
