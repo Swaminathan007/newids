@@ -50,7 +50,7 @@
       },
       yaxis: {
         min: 0,
-        max: 100
+        max: 10
       },
       legend: {
         show: true,
@@ -89,7 +89,7 @@
       },
       yaxis: {
         min: 0,
-        max: 100
+        max: 10
       },
       legend: {
         show: true,
@@ -116,6 +116,22 @@
               const stats = data[interface];
               let packetsSent = parseInt(stats.packets_sent);
               let packetsRecv = parseInt(stats.packets_recv);
+              if(packetsSent >= ob_chart.axes.w.globals.maxY){
+                ob_chart.updateOptions({
+                  yaxis: {
+                      min: 0,
+                      max: packetsSent+20
+                  }
+                });
+              }
+              if(packetsRecv >= ib_chart.axes.w.globals.maxY){
+                ib_chart.updateOptions({
+                  yaxis: {
+                      min: 0,
+                      max: packetsRecv+20
+                  }
+                });
+              }
               ob_interfaces_list[c].data.push({
                 x: new Date().getTime(),
                 y: packetsSent
@@ -130,6 +146,7 @@
           console.log(ob_interfaces_list);
           ob_chart.updateSeries(ob_interfaces_list);
           ib_chart.updateSeries(ib_interfaces_list);
+          console.log(ob_chart.axes.w.globals.maxY);
         })
         .catch(error => console.error('Error fetching network stats:', error));
     }

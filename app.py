@@ -454,9 +454,8 @@ def jara_client_display(jara_client):
     return render_template("jara_client.html",jara_client_current=jara_client_current,jara_client=jara_client)
 @app.route("/jara/client/<jara_client>/analyse_file/<file>")
 def analyse(jara_client,file):
-    # socketio.emit('analyse_file',{'command':'sudo ./jara.py -c jara.conf','file':file},room=jara_client)
-    # return redirect(url_for("jara_clients_display"))
-    return f"{jara_client} {file}"
+    socketio.emit('analyse_file',{'file':file},room=jara_client)
+    return redirect(url_for("jara_clients_display"))
 @socketio.on('connect')
 def handle_connect():
     print(f'Client connected: {request.sid}')
