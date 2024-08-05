@@ -8,15 +8,15 @@
     <ul class="list-group">
         {%if jara_client_current.get("files")%}
             {%for file in jara_client_current["files"]%}
-                <li class="list-group-item"><a href="/jara/client/{{jara_client}}/analyse_file/{{file}}">{{file}}</a></li>
+                <a class="list-group-item list-group-item-action" href="/jara/client/{{jara_client}}/analyse_file/{{file}}">{{file}}</a>
             {%endfor%}
         {%endif%}
     </ul>
     <h3>Interfaces</h3>
     <ul class="list-group">
         {%if jara_client_current.get("interfaces")%}
-            {%for file in jara_client_current["interfaces"]%}
-                <li class="list-group-item"><a href="/jara">{{file}}</a></li>
+            {%for interface in jara_client_current["interfaces"]%}
+                <a class="list-group-item list-group-item-action" href="/jara/client/{{jara_client}}/analyse_interface/{{interface}}">{{interface}}</a>
             {%endfor%}
         {%endif%}
     </ul>

@@ -452,8 +452,12 @@ def jara_client_display(jara_client):
     jara_client_current = jara_clients[jara_client]
     return render_template("jara_client.html",jara_client_current=jara_client_current,jara_client=jara_client)
 @app.route("/jara/client/<jara_client>/analyse_file/<file>")
-def analyse(jara_client,file):
+def analyse_file(jara_client,file):
     socketio.emit('analyse_file',{'file':file},room=jara_client)
+    return redirect(url_for("jara_clients_display"))
+@app.route("/jara/client/<jara_client>/analyse_interface/<interface>")
+def analyse_interface(jara_client,interface):
+    socketio.emit('analyse_interface',{'interface':interface},room=jara_client)
     return redirect(url_for("jara_clients_display"))
 @socketio.on('connect')
 def handle_connect():
@@ -491,7 +495,12 @@ def system_shutdown():
         subprocess.run(['sudo', 'shutdown'] , check=True)
     except subprocess.CalledProcessError as e:
         return str(e)
-    return "Reboot"
+    return "Shutting down"
+###########################################WAZUH IFRAME##############################
+@app.route("/wazuh")
+@login_required
+def wazuh():
+    return render_template("wazuh.html")
 #############################################################################################
 app.register_blueprint(wifi_signal_blueprint)
 def main():

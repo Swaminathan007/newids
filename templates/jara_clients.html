@@ -7,7 +7,7 @@
       <ul class="list-group">
           {% if jara_clients %}
             {%for client in jara_clients%}
-                <li class="list-group-item"><a href="/jara/client/{{client}}">{{client}}</a></li>
+                <a class="list-group-item list-group-item-action" href="/jara/client/{{client}}">{{client}}</a>
             {%endfor%}
           {%else%}
             <p>No jara clients connected</p>
