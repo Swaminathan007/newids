@@ -81,14 +81,20 @@
 
         .sidebar-item {
             border: #000;
+            cursor: pointer;
             padding: 0.5rem;
             transition: background-color 0.3s ease;
             transition: color 0.3s ease;
         }
 
-        .sidebar-item.active {
+        .sidebar-item :hover {
+            border-radius: 2px;
             background-color: orange;
-            color: black
+        }
+
+        .sidebar-item ::selection {
+            background-color: orange;
+            color: black;
         }
 
         .sidebar-nav {
@@ -158,6 +164,16 @@
             }
         }
 
+
+        .sidebar-item.active {
+            background-color: orange; /* Change to the color you want */
+            color: white; /* Change to the text color you want */
+            border-radius: 2px;
+        }
+        
+        .sidebar-link.active {
+            color: white; /* Ensure the link text is visible */
+        }
 
         .illustration-img {
             max-width: 150px;
@@ -260,14 +276,6 @@
                             console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
                         });
                     }
-                }
-            });
-
-            // Detect if the full-screen mode is exited using the escape key or other method
-            document.addEventListener('fullscreenchange', () => {
-                if (!document.fullscreenElement) {
-                    fullscreenIcon.classList.remove('bi-fullscreen-exit');
-                    fullscreenIcon.classList.add('bi-fullscreen');
                 }
             });
         });
