@@ -4,6 +4,9 @@
 
 {% include "navbar.html" %}
     <h2>{{jara_client}}</h2>
+    <h3>Traffic</h3>
+    <div class="container shadow rounded p-2 mt-3 mb-2" id="ob_chart"></div>
+    <div class="container shadow rounded p-2 mt-3 mb-2" id="ib_chart"></div>
     <h3>Files</h3>
     <ul class="list-group">
         {%if jara_client_current.get("files")%}
@@ -25,4 +28,149 @@
 </main>
 </div>
 </div>
+
+<script>
+    var ob_interfaces_list = [];
+    var ib_interfaces_list = [];
+    let iface;
+    {%for interface in interfaces %}
+      iface = {};
+      iface.name = "{{interface}}";
+      iface.data = [];
+      ob_interfaces_list.push(iface);
+      ib_interfaces_list.push(iface);
+    {% endfor %}
+    console.log(ob_interfaces_list);
+    // Initialize chart options
+    const ob_options = {
+      chart: {
+        height: 350,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+      },
+      series: ob_interfaces_list,
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm:ss'
+        },
+        range: 10 * 1000 // 10 seconds
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      yaxis: {
+        min: 0,
+        max: 1000
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      },
+      title: {
+        text: "Outbound Traffic",
+      }
+    };
+    
+    const ib_options = {
+      chart: {
+        height: 350,
+        type: 'line',
+        animations: {
+          enabled: true,
+          easing: 'linear',
+          dynamicAnimation: {
+            speed: 1000
+          }
+        },
+        toolbar: {
+          show: false
+        },
+      },
+      series: ib_interfaces_list,
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm:ss'
+        },
+        range: 10 * 1000 // 10 seconds
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      yaxis: {
+        min: 0,
+        max: 1000
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      },
+      title: {
+        text: "Inbound Traffic",
+      },
+    };
+
+    var ob_chart = new ApexCharts(document.querySelector("#ob_chart"), ob_options);
+    var ib_chart = new ApexCharts(document.querySelector("#ib_chart"), ib_options);
+    ob_chart.render();
+    ib_chart.render();
+    function fetchNetworkStats() {
+      fetch('/jara/client/{{jara_client}}/network_stats')
+        .then(response => response.json())
+        .then(data => {
+          let c = 0;
+          console.log(data);
+          for (const interface in data) {
+            if (data.hasOwnProperty(interface)) {
+              const stats = data[interface];
+              let packetsSent = parseInt(stats.sent_per_sec);
+              let packetsRecv = parseInt(stats.recv_per_sec);
+              if(packetsSent >= ob_chart.axes.w.globals.maxY){
+                ob_chart.updateOptions({
+                  yaxis: {
+                      min: 0,
+                      max: packetsSent+20
+                  }
+                });
+              }
+              if(packetsRecv >= ib_chart.axes.w.globals.maxY){
+                ib_chart.updateOptions({
+                  yaxis: {
+                      min: 0,
+                      max: packetsRecv+20
+                  }
+                });
+              }
+              ob_interfaces_list[c].data.push({
+                x: new Date().getTime(),
+                y: packetsSent
+              });
+              ib_interfaces_list[c].data.push({
+                x: new Date().getTime(),
+                y: packetsRecv
+              });
+              c++;
+            }
+          }
+          console.log(ob_interfaces_list);
+          ob_chart.updateSeries(ob_interfaces_list);
+          ib_chart.updateSeries(ib_interfaces_list);
+          console.log(ob_chart.axes.w.globals.maxY);
+        })
+        .catch(error => console.error('Error fetching network stats:', error));
+    }
+
+    // Fetch network stats every second
+    setInterval(fetchNetworkStats, 1000);
+</script>
 {%endblock%}

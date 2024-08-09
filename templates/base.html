@@ -15,7 +15,7 @@
         *,
         ::after,
         ::before {
-            color:black;
+            color: black;
             box-sizing: border-box;
         }
 
@@ -39,16 +39,20 @@
         h4 {
             font-size: 1.275rem;
         }
+
         .wrapper {
             align-items: stretch;
             display: flex;
             width: 100%;
+
         }
+
         #sidebar {
             max-width: 264px;
             min-width: 264px;
             background: var(--bs-dark);
             transition: background-color 0.35s ease-in-out;
+
         }
 
         .main {
@@ -59,7 +63,7 @@
             overflow: hidden;
             transition: all 0.35s ease-in-out;
             width: 100%;
-            color:#000;
+            color: #000;
         }
 
         /* Sidebar Elements Style */
@@ -74,11 +78,17 @@
             font-size: 1.15rem;
             font-weight: 600;
         }
+
         .sidebar-item {
             border: #000;
             padding: 0.5rem;
             transition: background-color 0.3s ease;
             transition: color 0.3s ease;
+        }
+
+        .sidebar-item.active {
+            background-color: orange;
+            color: black
         }
 
         .sidebar-nav {
@@ -100,10 +110,12 @@
             position: relative;
             display: block;
         }
-        a.sidebar-link :hover{
+
+        a.sidebar-link :hover {
             background-color: rgb(163, 164, 255);
             border-radius: 10px;
         }
+
         .sidebar-link[data-bs-toggle="collapse"]::after {
             border: solid;
             border-width: 0 .075rem .075rem 0;
@@ -115,7 +127,7 @@
             top: 1.4rem;
             transform: rotate(-135deg);
             transition: all .2s ease-out;
-            color:#fff;
+            color: #fff;
             visibility: hidden;
         }
 
@@ -145,7 +157,7 @@
                 width: auto;
             }
         }
-        
+
 
         .illustration-img {
             max-width: 150px;
@@ -176,8 +188,8 @@
             }
         }
 
-              
-        
+
+
         #terminal {
             flex: 1;
             border: none;
@@ -187,17 +199,19 @@
             color: #fff;
             border-radius: 5px;
             overflow: auto;
-            height:500px;
+            height: 500px;
         }
+
         ::-webkit-scrollbar {
             width: 0px;
         }
-        #systemchart{
-            height:300px;
-        }
 
+        #systemchart {
+            height: 300px;
+        }
     </style>
 </head>
+
 <body data-bs-theme="light">
     <script src="https://unpkg.com/xterm@4.11.0/lib/xterm.js"></script>
     <script src="https://unpkg.com/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.js"></script>
@@ -208,56 +222,57 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     {%block content%}
     {%endblock%}
-<script>
-    const sidebarToggle = document.querySelector("#sidebar-toggle");
-    sidebarToggle.addEventListener("click",function(){
-        document.querySelector("#sidebar").classList.toggle("collapsed");
-    });
-</script>
-<script>
-    var socket1 = io.connect('http://' + document.domain + ':' + location.port);
-
-    socket1.on('log_update', function(data) {
-        alert(data.message); // This will show a popup with the log update message
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const fullscreenButton = document.getElementById('fullscreen-toggle');
-        const fullscreenIcon = document.getElementById('fullscreen-icon');
-    
-        fullscreenButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!document.fullscreenElement) {
-                // Enter full-screen
-                document.documentElement.requestFullscreen().then(() => {
-                    fullscreenIcon.classList.remove('bi-fullscreen');
-                    fullscreenIcon.classList.add('bi-fullscreen-exit');
-                }).catch((err) => {
-                    console.error(`Error attempting to enter full-screen mode: ${err.message} (${err.name})`);
-                });
-            } else {
-                // Exit full-screen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().then(() => {
-                        fullscreenIcon.classList.remove('bi-fullscreen-exit');
-                        fullscreenIcon.classList.add('bi-fullscreen');
-                    }).catch((err) => {
-                        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
-                    });
-                }
-            }
+    <script>
+        const sidebarToggle = document.querySelector("#sidebar-toggle");
+        sidebarToggle.addEventListener("click", function () {
+            document.querySelector("#sidebar").classList.toggle("collapsed");
         });
-    
-        // Detect if the full-screen mode is exited using the escape key or other method
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                fullscreenIcon.classList.remove('bi-fullscreen-exit');
-                fullscreenIcon.classList.add('bi-fullscreen');
-            }
-        });
-    });
     </script>
-    
+    <script>
+        var socket1 = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket1.on('log_update', function (data) {
+            alert(data.message); // This will show a popup with the log update message
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const fullscreenButton = document.getElementById('fullscreen-toggle');
+            const fullscreenIcon = document.getElementById('fullscreen-icon');
+
+            fullscreenButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    // Enter full-screen
+                    document.documentElement.requestFullscreen().then(() => {
+                        fullscreenIcon.classList.remove('bi-fullscreen');
+                        fullscreenIcon.classList.add('bi-fullscreen-exit');
+                    }).catch((err) => {
+                        console.error(`Error attempting to enter full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    // Exit full-screen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().then(() => {
+                            fullscreenIcon.classList.remove('bi-fullscreen-exit');
+                            fullscreenIcon.classList.add('bi-fullscreen');
+                        }).catch((err) => {
+                            console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+                        });
+                    }
+                }
+            });
+
+            // Detect if the full-screen mode is exited using the escape key or other method
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    fullscreenIcon.classList.remove('bi-fullscreen-exit');
+                    fullscreenIcon.classList.add('bi-fullscreen');
+                }
+            });
+        });
+    </script>
+
 </body>
+
 </html>

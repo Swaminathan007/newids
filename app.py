@@ -450,7 +450,15 @@ def jara_clients_display():
 @app.route("/jara/client/<jara_client>")
 def jara_client_display(jara_client):
     jara_client_current = jara_clients[jara_client]
-    return render_template("jara_client.html",jara_client_current=jara_client_current,jara_client=jara_client)
+    jara_client_interfaces = jara_client_current["interfaces"]
+    return render_template("jara_client.html",jara_client_current=jara_client_current,jara_client=jara_client,interfaces=jara_client_interfaces)
+@app.route("/jara/client/<jara_client>/network_stats",methods=["GET"])
+def client_network_stats(jara_client):
+    try:
+        stats = jara_clients[jara_client]["traffic"]
+        return jsonify(stats)
+    except:
+        return {}
 @app.route("/jara/client/<jara_client>/analyse_file/<file>")
 def analyse_file(jara_client,file):
     socketio.emit('analyse_file',{'file':file},room=jara_client)
@@ -464,9 +472,28 @@ def handle_connect():
     print(f'Client connected: {request.sid}')
 @socketio.on('python_client')
 def python_client(data):
+    global jara_clients
     jara_clients[request.sid] = {"files":data["files"],"interfaces":data["interfaces"]}
     print(f'Python client registered: {request.sid}')
     messages.append(f'Python client registered: {request.sid}')
+@socketio.on('network_traffic')
+def monitor_agent(data):
+    global jara_clients
+    jara_clients[request.sid]["traffic"] = data
+    # url = f'http://localhost:5000/jara/client/{request.sid}/network_stats' 
+    # headers = {
+    #     'Content-Type': 'application/json' 
+    # }
+    # try:
+    #     response = requests.post(url, json=data,headers=headers)
+    #     if response.status_code == 200:
+    #         print("Data successfully posted.")
+    #     else:
+    #         print(f"Failed to post data. Status code: {response.status_code}, Response: {response.text}")
+    # except requests.exceptions.RequestException as e:
+    #     print(f"An error occurred while trying to post data: {e}")
+
+
 @socketio.on('disconnect')
 def handle_disconnect():
     if request.sid in jara_clients:
@@ -476,6 +503,7 @@ def handle_disconnect():
 def handle_client_message(data):
     print(f'Received message from client: {data["data"]}')
     messages.append(f'Received message from client: {data["data"]}')
+
 ###########################################################################################
 
 

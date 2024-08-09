@@ -1,5 +1,5 @@
 <div class="wrapper">
-    <aside id="sidebar" style="overflow-y:hidden; transition: 200ms ease-in-out;">
+    <aside id="sidebar" style="overflow:hidden; transition: 200ms ease-in-out;">
         <div class="h-100 p-2">
             <div class="container p-2 d-flex align-items-center justify-content-center">
                 <h2 style="color:white;">OT-IDS</h2>
@@ -19,61 +19,47 @@
                             Firewall
                         </a>
                 </li>
-                    <li class="sidebar-item">
-                        <a href="/sniffer" class="sidebar-link">
-                            Packet Sniffer
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="/wazuh" class="sidebar-link">
-                            Wazuh
-                        </a>
-                    </li>
-                    
                 <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#aimlmodel"
-                            aria-expanded="false" aria-controls="dashboard">
-                            Model
-                        </a>
-                        <ul id="aimlmodel" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Train Model</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Test Model</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/feedback" class="sidebar-link">Feedback</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#User"
-                            aria-expanded="false" aria-controls="dashboard">
-                            Users and Groups
-                        </a>
-                        <ul id="User" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">User</a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="#" class="sidebar-link">Groups</a>
-                            </li>
-            
-                        </ul>
-                    </li>
-        
-                
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
-                        aria-expanded="false" aria-controls="auth">
-                        Auth
+                    <a href="/sniffer" class="sidebar-link">
+                        Packet Sniffer
                     </a>
-                    <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                </li>
+                <li class="sidebar-item">
+                    <a href="/wazuh" class="sidebar-link">
+                        Wazuh
+                    </a>
+                </li>
                 
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#aimlmodel"
+                        aria-expanded="false" aria-controls="dashboard">
+                        Model
+                    </a>
+                    <ul id="aimlmodel" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Register</a>
+                            <a href="#" class="sidebar-link">Train Model</a>
                         </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Test Model</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/feedback" class="sidebar-link">Feedback</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse" data-bs-target="#User"
+                        aria-expanded="false" aria-controls="dashboard">
+                        Users and Groups
+                    </a>
+                    <ul id="User" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">User</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="#" class="sidebar-link">Groups</a>
+                        </li>
+        
                     </ul>
                 </li>
                 <li class="sidebar-item">
@@ -85,9 +71,8 @@
         </div>
     </aside>
     <div class="main" style="overflow-y: auto;">
-        <nav class="navbar navbar-expand px-3 border-bottom sticky-top">
+        <nav class="navbar px-3 border-bottom sticky-top">
             <div class="container-fluid">
-                <!-- Hamburger Icon on the left -->
                 <button class="btn logo" id="sidebar-toggle" type="button" style="background-color: #fd7e14;">
                     <span class="navbar-toggler-icon" style="color: #000;"></span>
                 </button>
